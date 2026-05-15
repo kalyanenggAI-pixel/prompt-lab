@@ -1,0 +1,55 @@
+{
+  "versions": [
+    {
+      "id": "example001",
+      "name": "v1 — basic summarizer",
+      "status": "archived",
+      "systemPrompt": "You are a summarization assistant. Be concise.",
+      "userMessage": "Summarize the following text in 3 bullet points:\n\n{{text}}",
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-20250514",
+      "temperature": 0.3,
+      "maxTokens": 512,
+      "variables": [
+        { "key": "text", "value": "Paste your text here to summarize it." }
+      ],
+      "tests": [
+        {
+          "id": "example001_case001",
+          "name": "concise policy summary",
+          "userMessage": "Summarize the following text in 3 bullet points:\n\n{{text}}",
+          "expectedContains": ""
+        }
+      ],
+      "createdAt": 1700000000000,
+      "avgScore": 3.2,
+      "notes": "Too terse. Loses context."
+    },
+    {
+      "id": "example002",
+      "name": "v2 — structured summarizer",
+      "status": "tested",
+      "systemPrompt": "You are an expert summarization assistant. Always output:\n1. A one-sentence TL;DR\n2. 3-5 key points as bullets\n3. One open question the text raises",
+      "userMessage": "Please summarize this for me:\n\n{{text}}",
+      "provider": "anthropic",
+      "model": "claude-sonnet-4-20250514",
+      "temperature": 0.5,
+      "maxTokens": 1024,
+      "variables": [
+        { "key": "text", "value": "Paste your text here to summarize it." }
+      ],
+      "tests": [
+        {
+          "id": "example002_case001",
+          "name": "structured summary",
+          "userMessage": "Please summarize this for me:\n\n{{text}}",
+          "expectedContains": "TL;DR"
+        }
+      ],
+      "createdAt": 1700086400000,
+      "avgScore": 4.5,
+      "notes": "Much better. The open question format is a hit."
+    }
+  ],
+  "runs": []
+}

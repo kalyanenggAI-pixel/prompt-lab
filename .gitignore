@@ -1,0 +1,15 @@
+# secrets
+.env
+*.key
+*.pem
+
+# OS
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+
+# if you extend with Node
+node_modules/

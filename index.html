@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prompt Lab — Claude prompt versioning + evals</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0d0d0f;--surface:#141417;--s2:#1c1c21;--s3:#242429;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#f0f0ee;--muted:#888886;
+  --accent:#c8f060;--a2:#60bff0;--a3:#f0a060;--danger:#f06060;--ok:#60f0a0;
+  --mono:'SFMono-Regular',Consolas,'Liberation Mono',monospace;
+  --display:Iowan Old Style,'Palatino Linotype',Book Antiqua,Georgia,serif;
+  --r:8px;--rl:14px;
+}
+body{font-family:var(--mono);background:var(--bg);color:var(--text);min-height:100vh;font-size:13px;line-height:1.6}
+.app{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
+
+/* HEADER */
+header{border-bottom:1px solid var(--border);padding:13px 22px;display:flex;align-items:center;justify-content:space-between;background:var(--surface);gap:10px;flex-wrap:wrap}
+.logo{font-family:var(--display);font-size:20px;font-weight:300;color:var(--accent);white-space:nowrap}
+.logo span{color:var(--muted);font-size:11px;font-family:var(--mono);margin-left:10px}
+.hactions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+
+/* MAIN GRID */
+.main{display:grid;grid-template-columns:280px minmax(520px,1fr) 330px;height:calc(100vh - 50px);overflow:hidden}
+
+/* SIDEBAR */
+.sidebar{border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);overflow:hidden}
+.sb-head{padding:11px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.sb-title{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
+.vlist{flex:1;overflow-y:auto;padding:5px}
+.vitem{padding:10px 11px;border-radius:var(--r);cursor:pointer;border:1px solid transparent;margin-bottom:3px;transition:all .15s}
+.vitem:hover{background:var(--s2);border-color:var(--border)}
+.vitem.active{background:var(--s3);border-color:var(--border2)}
+.vitem.active .vname{color:var(--accent)}
+.vrow1{display:flex;align-items:center;justify-content:space-between;margin-bottom:3px}
+.vname{font-size:12px;font-weight:500;color:var(--text);display:flex;align-items:center;gap:6px}
+.pdot{display:inline-block;width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.vbadge{font-size:10px;padding:2px 6px;border-radius:20px;font-weight:500}
+.bd{background:rgba(240,160,96,.15);color:var(--a3);border:1px solid rgba(240,160,96,.25)}
+.bt{background:rgba(96,240,160,.12);color:var(--ok);border:1px solid rgba(96,240,160,.2)}
+.ba{background:rgba(136,136,134,.12);color:var(--muted);border:1px solid rgba(136,136,134,.2)}
+.vmeta{font-size:10px;color:var(--muted)}
+.vscore{color:var(--a2)}
+.vacts{display:flex;gap:4px;margin-top:5px;opacity:0;transition:opacity .15s}
+.vitem:hover .vacts{opacity:1}
+
+/* EDITOR */
+.epane{display:flex;flex-direction:column;overflow:hidden}
+.etoolbar{padding:8px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;background:var(--surface);flex-shrink:0;flex-wrap:wrap}
+.tabs{display:flex;gap:2px}
+.tab{padding:5px 11px;border-radius:var(--r);cursor:pointer;font-size:12px;color:var(--muted);transition:all .15s;border:1px solid transparent}
+.tab:hover{color:var(--text);background:var(--s2)}
+.tab.active{color:var(--accent);background:var(--s3);border-color:var(--border2)}
+.sp{flex:1}
+.ebody{flex:1;overflow-y:auto;padding:15px;display:flex;flex-direction:column;gap:13px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.fl .tag{font-size:10px;text-transform:none;letter-spacing:0;padding:2px 7px;border-radius:20px;background:rgba(96,191,240,.12);color:var(--a2);border:1px solid rgba(96,191,240,.2)}
+input[type=text],input[type=password],textarea,select{background:var(--s2);border:1px solid var(--border2);border-radius:var(--r);color:var(--text);font-family:var(--mono);font-size:13px;padding:9px 11px;width:100%;transition:border-color .15s;resize:none}
+input[type=text]:focus,input[type=password]:focus,textarea:focus,select:focus{outline:none;border-color:var(--accent)}
+select option{background:var(--s2)}
+#sysPrompt{min-height:105px}
+#userMsg{min-height:70px}
+.trow{display:flex;gap:10px;align-items:center}
+.trow input[type=range]{flex:1;padding:0;background:transparent;border:none;accent-color:var(--accent)}
+.tval{color:var(--accent);font-size:12px;min-width:28px;text-align:right}
+.varrow{display:flex;gap:6px;align-items:center;margin-bottom:5px}
+.vkey{width:95px;flex-shrink:0}
+.divider{height:1px;background:var(--border);margin:2px 0}
+.hint{font-size:11px;color:var(--muted);line-height:1.6}
+.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.metricrow{display:flex;gap:7px;flex-wrap:wrap}
+.metric{font-size:11px;padding:4px 8px;border-radius:999px;background:var(--s2);border:1px solid var(--border);color:var(--muted)}
+.metric strong{color:var(--text)}
+
+/* PROVIDER GRID */
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
+.pgrid.single{grid-template-columns:1fr}
+.pcard{padding:8px 9px;border-radius:var(--r);border:1px solid var(--border2);cursor:pointer;transition:all .15s;background:var(--s2);display:flex;align-items:center;gap:7px}
+.pcard:hover{border-color:rgba(255,255,255,.2);background:var(--s3)}
+.pcard.sel{border-color:var(--accent);background:rgba(200,240,96,.05)}
+.pmark{width:20px;height:20px;border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#0d0d0f;flex-shrink:0}
+.pname{font-size:11px;font-weight:500;color:var(--text)}
+.psub{font-size:10px;color:var(--muted)}
+.nokey{font-size:11px;color:var(--a3);margin-top:3px}
+
+/* RESULTS */
+.rpane{border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);overflow:hidden}
+.rhead{padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;flex-shrink:0}
+.rtitle{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
+.rlist{flex:1;overflow-y:auto;padding:7px;display:flex;flex-direction:column;gap:7px}
+.rcard{background:var(--s2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.rchead{padding:8px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.rcmeta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.rcver{font-size:11px;color:var(--accent);font-weight:500}
+.rcprov{font-size:10px;padding:1px 6px;border-radius:20px}
+.rctime{font-size:10px;color:var(--muted)}
+.rcstats{display:flex;gap:7px;flex-shrink:0}
+.stat{font-size:10px;color:var(--muted)}
+.stat strong{color:var(--text)}
+.rcbody{padding:9px 11px}
+.rcout{font-size:12px;color:var(--text);line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:170px;overflow-y:auto}
+.rcrating{padding:7px 11px;border-top:1px solid var(--border);display:flex;align-items:center;gap:5px}
+.rlabel{font-size:10px;color:var(--muted);margin-right:2px}
+.star{cursor:pointer;font-size:14px;color:var(--border2);transition:color .1s;user-select:none}
+.star.on,.star:hover{color:var(--a3)}
+.tbadge{font-size:10px;padding:2px 6px;border-radius:20px;background:rgba(96,191,240,.1);color:var(--a2);border:1px solid rgba(96,191,240,.15)}
+.pass{color:var(--ok);border-color:rgba(96,240,160,.2);background:rgba(96,240,160,.1)}
+.fail{color:var(--danger);border-color:rgba(240,96,96,.2);background:rgba(240,96,96,.1)}
+.snap{font-size:10px;color:var(--muted);padding:7px 11px;border-top:1px solid var(--border);background:rgba(255,255,255,.015)}
+
+/* COMPARE */
+.cpanel{padding:13px 15px;display:none;flex-direction:column;gap:13px;overflow-y:auto}
+.cpanel.on{display:flex}
+.cgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.ccard{background:var(--s2);border:1px solid var(--border);border-radius:var(--rl);padding:11px}
+.ctitle{font-size:11px;color:var(--accent);font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:5px}
+.ctext{font-size:11px;line-height:1.7;white-space:pre-wrap;color:var(--text);max-height:240px;overflow-y:auto}
+.dbar{height:4px;border-radius:2px;background:var(--s3);overflow:hidden}
+.dfill{height:100%;border-radius:2px;background:var(--accent);transition:width .5s}
+.diff{display:grid;gap:8px;margin-top:11px}
+.diffrow{background:var(--s2);border:1px solid var(--border);border-radius:var(--r);padding:9px 10px}
+.diffrow strong{display:block;font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px}
+.diffrow p{font-size:11px;color:var(--text);white-space:pre-wrap}
+
+/* STREAMING */
+.si{display:none;align-items:center;gap:7px;padding:10px 13px}
+.si.on{display:flex}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:pulse 1s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
+.stext{color:var(--muted);font-size:12px;font-style:italic}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.78);display:flex;align-items:center;justify-content:center;z-index:100;backdrop-filter:blur(4px)}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:var(--rl);padding:26px;width:500px;max-width:94vw;max-height:90vh;overflow-y:auto}
+.modal h2{font-family:var(--display);font-size:20px;font-weight:300;margin-bottom:4px;color:var(--accent)}
+.msub{color:var(--muted);font-size:12px;margin-bottom:16px;line-height:1.7}
+.privacy{background:rgba(96,240,160,.06);border:1px solid rgba(96,240,160,.22);border-radius:var(--r);padding:11px 13px;margin-bottom:18px}
+.privacy p{font-size:11px;color:#a0f0c0;line-height:1.7}
+.privacy strong{color:var(--ok)}
+.krow{margin-bottom:11px}
+.klabel{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--muted);margin-bottom:4px}
+.klabel strong{color:var(--text)}
+.kinput{display:flex;gap:6px}
+.kinput input{flex:1;font-size:12px}
+.ksaved{font-size:10px;color:var(--ok);padding:2px 7px;border-radius:20px;background:rgba(96,240,160,.1);border:1px solid rgba(96,240,160,.2);white-space:nowrap;align-self:center}
+.kprovider{display:flex;align-items:center;gap:8px}
+
+/* BUTTONS */
+.btn{font-family:var(--mono);font-size:12px;padding:6px 12px;border-radius:var(--r);cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text);transition:all .15s;display:inline-flex;align-items:center;gap:5px;white-space:nowrap}
+.btn:hover{background:var(--s3);border-color:rgba(255,255,255,.18)}
+.btn:active{transform:scale(.98)}
+.btn-a{background:var(--accent);color:#0a0a0c;border-color:var(--accent);font-weight:500}
+.btn-a:hover{background:#d4f575;border-color:#d4f575}
+.btn-a:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-sm{padding:4px 8px;font-size:11px}
+.btn-g{border-color:transparent;color:var(--muted)}
+.btn-g:hover{color:var(--text);background:var(--s2);border-color:var(--border)}
+.btn-d{color:var(--danger)}
+.btn-d:hover{background:rgba(240,96,96,.1);border-color:rgba(240,96,96,.3)}
+
+/* MISC */
+.empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);text-align:center;padding:40px}
+.empty .big{font-size:34px;opacity:.22}
+.empty p{font-size:12px;line-height:1.7;max-width:170px}
+.chip{display:inline-flex;align-items:center;font-size:11px;padding:2px 8px;border-radius:20px;background:var(--s3);border:1px solid var(--border);color:var(--muted)}
+code{background:var(--s3);padding:1px 5px;border-radius:4px;font-size:11px;color:var(--a2)}
+.toast{position:fixed;bottom:18px;right:18px;background:var(--s3);border:1px solid var(--border2);border-radius:var(--r);padding:8px 13px;font-size:12px;color:var(--text);z-index:200;transform:translateY(60px);opacity:0;transition:all .25s}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{border-color:rgba(96,240,160,.3);color:var(--ok)}
+.toast.err{border-color:rgba(240,96,96,.3);color:var(--danger)}
+::-webkit-scrollbar{width:3px;height:3px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--s3);border-radius:2px}
+.hidden{display:none!important}
+
+/* TEST CASES */
+.tests{display:flex;flex-direction:column;gap:7px}
+.testcard{border:1px solid var(--border);border-radius:var(--r);background:var(--s2);padding:9px;display:flex;flex-direction:column;gap:7px}
+.testhead{display:flex;gap:7px;align-items:center}
+.testhead input{flex:1}
+.testgrid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.testgrid textarea{min-height:54px}
+
+/* RESPONSIVE */
+@media (max-width: 1120px){
+  .main{grid-template-columns:240px 1fr;height:auto;min-height:calc(100vh - 50px)}
+  .rpane{grid-column:1 / -1;border-left:none;border-top:1px solid var(--border);min-height:320px}
+}
+@media (max-width: 760px){
+  .main{display:flex;flex-direction:column;height:auto}
+  .sidebar{border-right:none;border-bottom:1px solid var(--border);max-height:260px}
+  .epane{min-height:640px}
+  .field-grid,.cgrid,.testgrid{grid-template-columns:1fr}
+  .pgrid{grid-template-columns:1fr}
+  header{padding:12px 14px}
+}
+</style>
+</head>
+<body>
+
+<!-- KEYS MODAL -->
+<div class="overlay" id="keysModal">
+  <div class="modal">
+    <h2>Prompt Lab</h2>
+    <p class="msub">Prompt versioning, side-by-side comparison, and lightweight evals for Claude in one self-contained file.</p>
+    <div class="privacy">
+      <p>🔒 <strong>Your API keys never leave your browser.</strong><br>
+      Keys are stored only in your browser's <code>localStorage</code> — no backend, no analytics, no tracking. API calls go directly from your browser to Anthropic. <strong>Use this as a local dev tool, not a public hosted app.</strong></p>
+    </div>
+    <div id="keysList"></div>
+    <button class="btn btn-a" onclick="saveKeys()" style="width:100%;margin-top:8px">Start building →</button>
+    <p style="font-size:10px;color:var(--muted);margin-top:9px;text-align:center">You only need one Anthropic key to start testing Claude prompts.</p>
+  </div>
+</div>
+
+<div class="app">
+  <header>
+    <div class="logo">Prompt Lab <span>Claude versioning + evals</span></div>
+    <div class="hactions">
+      <button class="btn btn-sm btn-g" onclick="openKeys()">🔑 manage keys</button>
+      <button class="btn btn-sm btn-g" onclick="doExport()">↓ export</button>
+      <button class="btn btn-sm btn-g" onclick="doImport()">↑ import</button>
+      <button class="btn btn-sm btn-a" onclick="newVer()">+ new version</button>
+    </div>
+  </header>
+
+  <div class="main">
+    <!-- SIDEBAR -->
+    <div class="sidebar">
+      <div class="sb-head">
+        <span class="sb-title">Versions</span>
+        <span class="chip" id="vcount">0</span>
+      </div>
+      <div class="vlist" id="vlist">
+        <div class="empty"><div class="big">∅</div><p>No versions yet.</p></div>
+      </div>
+      <div style="padding:9px;border-top:1px solid var(--border)">
+        <button class="btn" style="width:100%" onclick="newVer()">+ new version</button>
+      </div>
+    </div>
+
+    <!-- EDITOR -->
+    <div class="epane">
+      <div class="etoolbar">
+        <div class="tabs">
+          <div class="tab active" data-t="editor" onclick="switchTab('editor')">editor</div>
+          <div class="tab" data-t="compare" onclick="switchTab('compare')">compare</div>
+        </div>
+        <div class="sp"></div>
+        <button class="btn" id="suiteBtn" onclick="runSuite()" disabled>run suite</button>
+        <button class="btn btn-a" id="runBtn" onclick="runPrompt()" disabled>▶ run</button>
+      </div>
+      <div class="ebody" id="editorTab">
+        <div style="text-align:center;color:var(--muted);padding:50px 30px">
+          <div style="font-size:30px;opacity:.2;margin-bottom:10px">✎</div>
+          <p style="font-size:12px;line-height:1.8">Select a version or create a new one.</p>
+          <button class="btn btn-a" style="margin-top:14px" onclick="newVer()">+ new version</button>
+        </div>
+      </div>
+      <div class="cpanel" id="compareTab">
+        <div style="display:flex;gap:9px;align-items:flex-end;flex-wrap:wrap">
+          <div class="fg" style="flex:1;min-width:110px">
+            <label class="fl">Version A</label>
+            <select id="cmpA"></select>
+          </div>
+          <div class="fg" style="flex:1;min-width:110px">
+            <label class="fl">Version B</label>
+            <select id="cmpB"></select>
+          </div>
+          <button class="btn btn-a" onclick="runCompare()">compare →</button>
+        </div>
+        <div id="cmpResults"></div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div class="rpane">
+      <div class="rhead">
+        <span class="rtitle">Run History</span>
+        <div class="sp"></div>
+        <button class="btn btn-sm btn-g" onclick="clearRuns()">clear</button>
+      </div>
+      <div class="si" id="si"><div class="sdot"></div><span class="stext" id="stxt">Running...</span></div>
+      <div class="rlist" id="rlist">
+        <div class="empty"><div class="big">◎</div><p>Run a prompt to see results.</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+<input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
+
+<script>
+// ─── PROVIDERS ────────────────────────────────────────────────────────────────
+const P = {
+  anthropic: {
+    name:'Anthropic', color:'#c8a882',
+    hint:'sk-ant-...', docs:'https://console.anthropic.com/keys',
+    models:[
+      {id:'claude-sonnet-4-20250514',label:'Claude Sonnet 4 ✦'},
+      {id:'claude-opus-4-20250514',label:'Claude Opus 4'},
+      {id:'claude-haiku-4-5-20251001',label:'Claude Haiku 4.5 (fast)'},
+    ],
+    async run(key,sys,user,model,temp,maxt,cb){
+      const r=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model,max_tokens:maxt,temperature:temp,system:sys,messages:[{role:'user',content:user}],stream:true})
+      });
+      if(!r.ok){const e=await r.json();throw new Error(e.error?.message||`HTTP ${r.status}`)}
+      const rd=r.body.getReader(),dc=new TextDecoder();
+      let it=0,ot=0;
+      while(true){
+        const{done,value}=await rd.read();if(done)break;
+        for(const ln of dc.decode(value).split('\n')){
+          if(!ln.startsWith('data: '))continue;
+          const d=ln.slice(6).trim();if(d==='[DONE]')continue;
+          try{const ev=JSON.parse(d);
+            if(ev.type==='content_block_delta'&&ev.delta?.text)cb(ev.delta.text);
+            if(ev.type==='message_start'&&ev.message?.usage)it=ev.message.usage.input_tokens;
+            if(ev.type==='message_delta'&&ev.usage)ot=ev.usage.output_tokens;
+          }catch(e){}
+        }
+      }
+      return{it,ot};
+    }
+  }
+};
+const PIDS=['anthropic'];
+const PMARKS={anthropic:'A'};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let S={versions:[],runs:[],active:null};
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded',()=>{
+  loadS();
+  renderKeysList();
+  const hasKey=PIDS.some(id=>localStorage.getItem('pl_k_'+id));
+  document.getElementById('keysModal').style.display=hasKey?'none':'flex';
+  renderSidebar();renderRuns();
+  if(S.versions.length)selVer(S.versions[0].id);
+});
+
+// ─── KEYS ─────────────────────────────────────────────────────────────────────
+const gk=id=>localStorage.getItem('pl_k_'+id)||'';
+const sk=(id,v)=>v?localStorage.setItem('pl_k_'+id,v):localStorage.removeItem('pl_k_'+id);
+
+function renderKeysList(){
+  document.getElementById('keysList').innerHTML=PIDS.map(id=>{
+    const p=P[id],saved=gk(id);
+    return`<div class="krow">
+      <div class="klabel">
+        <span class="kprovider"><span class="pmark" style="background:${p.color}">${PMARKS[id]||p.name[0]}</span><strong>${p.name}</strong></span>
+        <a href="${p.docs}" target="_blank" style="color:var(--muted);font-size:10px;text-decoration:none">get key ↗</a>
+        ${saved?`<span class="ksaved">✓ saved</span>`:''}
+      </div>
+      <div class="kinput">
+        <input type="password" id="ki_${id}" placeholder="${p.hint}" autocomplete="off"
+          value="${saved?'••••••••':''}" onfocus="if(this.value==='••••••••')this.value=''">
+        ${saved?`<button class="btn btn-sm btn-g btn-d" onclick="clearKey('${id}')">clear</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function saveKeys(){
+  let savedAny=false;
+  PIDS.forEach(id=>{const el=document.getElementById('ki_'+id);if(el&&el.value&&el.value!=='••••••••'){sk(id,el.value.trim());savedAny=true;}});
+  document.getElementById('keysModal').style.display='none';
+  toast(savedAny?'Key saved in your browser only ✓':'Ready to build','ok');
+}
+
+function openKeys(){renderKeysList();document.getElementById('keysModal').style.display='flex';}
+function clearKey(id){sk(id,'');renderKeysList();toast(`${P[id].name} key removed`,'ok');}
+
+// ─── PERSISTENCE ──────────────────────────────────────────────────────────────
+function saveS(){localStorage.setItem('pl_s',JSON.stringify({versions:S.versions,runs:S.runs}));}
+function loadS(){
+  try{
+    const r=localStorage.getItem('pl_s');if(!r)return;
+    const d=JSON.parse(r);
+    S.versions=(d.versions||[]).map(normalizeVersion);
+    S.runs=(d.runs||[]).map(normalizeRun);
+    recomputeAllScores();
+  }catch(e){console.warn('Could not load saved state',e);}
+}
+
+// ─── VERSIONS ─────────────────────────────────────────────────────────────────
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+
+function newVer(){
+  const v={id:uid(),name:`v${S.versions.length+1}`,status:'draft',
+    systemPrompt:'You are a helpful assistant.',userMessage:'Tell me something interesting.',
+    provider:'anthropic',model:'claude-sonnet-4-20250514',
+    temperature:0.7,maxTokens:1024,variables:[],tests:[defaultTest()],createdAt:Date.now(),avgScore:null,notes:''};
+  S.versions.unshift(v);saveS();renderSidebar();selVer(v.id);toast('New version created','ok');
+}
+
+function selVer(id){
+  S.active=id;renderSidebar();renderEditor();
+  document.getElementById('runBtn').disabled=false;
+  document.getElementById('suiteBtn').disabled=false;
+}
+const gv=id=>S.versions.find(v=>v.id===id);
+
+function delVer(id){
+  if(!confirm('Delete this version?'))return;
+  S.versions=S.versions.filter(v=>v.id!==id);
+  if(S.active===id)S.active=S.versions[0]?.id||null;
+  saveS();renderSidebar();
+  S.active?selVer(S.active):emptyEditor();
+}
+
+function dupVer(id){
+  const c=JSON.parse(JSON.stringify(gv(id)));
+  c.id=uid();c.name+=' (copy)';c.status='draft';c.createdAt=Date.now();c.avgScore=null;
+  S.versions.unshift(c);saveS();renderSidebar();selVer(c.id);toast('Duplicated','ok');
+}
+
+// ─── SIDEBAR ──────────────────────────────────────────────────────────────────
+function renderSidebar(){
+  const el=document.getElementById('vlist');
+  document.getElementById('vcount').textContent=S.versions.length;
+  if(!S.versions.length){el.innerHTML='<div class="empty"><div class="big">∅</div><p>No versions yet.</p></div>';return;}
+  el.innerHTML=S.versions.map(v=>{
+    const p=P[v.provider]||P.anthropic;
+    const rc=S.runs.filter(r=>r.vid===v.id).length;
+    const sc=v.avgScore!=null?`<span class="vscore">★${v.avgScore.toFixed(1)} </span>`:'';
+    const bc={'draft':'bd','tested':'bt','archived':'ba'}[v.status]||'bd';
+    return`<div class="vitem${v.id===S.active?' active':''}" onclick="selVer('${v.id}')">
+      <div class="vrow1">
+        <span class="vname"><span class="pdot" style="background:${p.color}"></span>${esc(v.name)}</span>
+        <span class="vbadge ${bc}">${v.status}</span>
+      </div>
+      <div class="vmeta">${sc}${rc} run${rc!==1?'s':''} · ${ago(v.createdAt)}</div>
+      <div class="vacts">
+        <button class="btn btn-sm btn-g" onclick="event.stopPropagation();dupVer('${v.id}')">copy</button>
+        <button class="btn btn-sm btn-g btn-d" onclick="event.stopPropagation();delVer('${v.id}')">del</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── EDITOR ───────────────────────────────────────────────────────────────────
+function emptyEditor(){
+  document.getElementById('editorTab').innerHTML='<div style="text-align:center;color:var(--muted);padding:50px 30px"><div style="font-size:30px;opacity:.2;margin-bottom:10px">✎</div><p style="font-size:12px;line-height:1.8">Select or create a version.</p><button class="btn btn-a" style="margin-top:14px" onclick="newVer()">+ new version</button></div>';
+  document.getElementById('runBtn').disabled=true;
+  document.getElementById('suiteBtn').disabled=true;
+}
+
+function renderEditor(){
+  const v=gv(S.active);if(!v){emptyEditor();return;}
+  const p=P[v.provider]||P.anthropic;
+  const hasKey=!!gk(v.provider);
+  document.getElementById('editorTab').innerHTML=`
+    <div class="fg">
+      <label class="fl">Version name</label>
+      <input type="text" value="${esc(v.name)}" oninput="upd('name',this.value)" style="font-size:14px">
+    </div>
+    <div class="fg">
+      <label class="fl">Status</label>
+      <select onchange="upd('status',this.value)">
+        <option value="draft"${v.status==='draft'?' selected':''}>draft</option>
+        <option value="tested"${v.status==='tested'?' selected':''}>tested</option>
+        <option value="archived"${v.status==='archived'?' selected':''}>archived</option>
+      </select>
+    </div>
+    <div class="divider"></div>
+    <div class="fg">
+      <label class="fl">Provider</label>
+      <div class="pgrid${PIDS.length===1?' single':''}">${PIDS.map(id=>`
+        <div class="pcard${v.provider===id?' sel':''}" onclick="selProv('${id}')">
+          <span class="pmark" style="background:${P[id].color}">${PMARKS[id]||P[id].name[0]}</span>
+          <div><div class="pname">${P[id].name}</div><div class="psub">${gk(id)?'✓ key set':'no key'}</div></div>
+        </div>`).join('')}</div>
+    </div>
+    <div class="fg">
+      <label class="fl">Model</label>
+      <select id="msel" onchange="upd('model',this.value)">
+        ${p.models.map(m=>`<option value="${m.id}"${v.model===m.id?' selected':''}>${m.label}</option>`).join('')}
+      </select>
+      ${!hasKey?`<p class="nokey">⚠ No key for ${p.name}. <button class="btn btn-sm btn-g" onclick="openKeys()" style="padding:2px 7px">add key</button></p>`:''}
+    </div>
+    <div class="divider"></div>
+    <div class="fg">
+      <label class="fl">System prompt <span class="tag">system</span></label>
+      <textarea id="sysPrompt" oninput="upd('systemPrompt',this.value)">${esc(v.systemPrompt)}</textarea>
+    </div>
+    <div class="fg">
+      <label class="fl">User message <span class="tag">user</span></label>
+      <textarea id="userMsg" oninput="upd('userMessage',this.value)">${esc(v.userMessage)}</textarea>
+    </div>
+    <div class="fg">
+      <label class="fl">Variables <span style="font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0">— use {{key}} in prompts</span></label>
+      <div id="vars">${renderVars(v)}</div>
+      <button class="btn btn-sm btn-g" onclick="addVar()" style="margin-top:5px">+ add variable</button>
+    </div>
+    <div class="divider"></div>
+    <div class="fg">
+      <label class="fl">Test cases</label>
+      <p class="hint">Use one-off runs for exploration, and suites when you want repeatable checks across realistic inputs.</p>
+      <div class="tests" id="tests">${renderTests(v)}</div>
+      <button class="btn btn-sm btn-g" onclick="addTest()" style="margin-top:5px">+ add test case</button>
+    </div>
+    <div class="divider"></div>
+    <div class="field-grid">
+      <div class="fg">
+        <label class="fl">Temperature</label>
+        <div class="trow">
+          <input type="range" min="0" max="1" step="0.05" value="${v.temperature}"
+            oninput="upd('temperature',parseFloat(this.value));document.getElementById('tv').textContent=parseFloat(this.value).toFixed(2)">
+          <span class="tval" id="tv">${v.temperature.toFixed(2)}</span>
+        </div>
+      </div>
+      <div class="fg">
+        <label class="fl">Max tokens</label>
+        <input type="text" value="${v.maxTokens}" oninput="upd('maxTokens',parseInt(this.value)||1024)">
+      </div>
+    </div>
+    <div class="fg">
+      <label class="fl">Notes</label>
+      <textarea style="min-height:55px" oninput="upd('notes',this.value)">${esc(v.notes)}</textarea>
+    </div>
+  `;
+}
+
+function renderVars(v){
+  if(!v.variables?.length)return'<p style="font-size:11px;color:var(--muted)">No variables.</p>';
+  return v.variables.map((r,i)=>`<div class="varrow">
+    <input class="vkey" type="text" placeholder="key" value="${esc(r.key)}" oninput="updVar(${i},'key',this.value)">
+    <input type="text" placeholder="value" value="${esc(r.value)}" oninput="updVar(${i},'value',this.value)">
+    <button class="btn btn-sm btn-g btn-d" onclick="rmVar(${i})">✕</button>
+  </div>`).join('');
+}
+
+function renderTests(v){
+  if(!v.tests?.length)return'<p style="font-size:11px;color:var(--muted)">No test cases yet.</p>';
+  return v.tests.map((t,i)=>`<div class="testcard">
+    <div class="testhead">
+      <input type="text" placeholder="case name" value="${esc(t.name)}" oninput="updTest(${i},'name',this.value)">
+      <button class="btn btn-sm btn-g btn-d" onclick="rmTest(${i})">✕</button>
+    </div>
+    <div class="testgrid">
+      <textarea placeholder="user input for this case" oninput="updTest(${i},'userMessage',this.value)">${esc(t.userMessage)}</textarea>
+      <textarea placeholder="optional expected phrase" oninput="updTest(${i},'expectedContains',this.value)">${esc(t.expectedContains)}</textarea>
+    </div>
+  </div>`).join('');
+}
+
+function selProv(id){const v=gv(S.active);if(!v)return;v.provider=id;v.model=P[id].models[0].id;saveS();renderSidebar();renderEditor();}
+function addVar(){const v=gv(S.active);if(!v)return;v.variables=v.variables||[];v.variables.push({key:'',value:''});saveS();document.getElementById('vars').innerHTML=renderVars(v);}
+function rmVar(i){const v=gv(S.active);if(!v)return;v.variables.splice(i,1);saveS();document.getElementById('vars').innerHTML=renderVars(v);}
+function updVar(i,f,val){const v=gv(S.active);if(!v||!v.variables[i])return;v.variables[i][f]=val;saveS();}
+function addTest(){const v=gv(S.active);if(!v)return;v.tests=v.tests||[];v.tests.push(defaultTest(`case ${v.tests.length+1}`));saveS();document.getElementById('tests').innerHTML=renderTests(v);}
+function rmTest(i){const v=gv(S.active);if(!v)return;v.tests.splice(i,1);saveS();document.getElementById('tests').innerHTML=renderTests(v);}
+function updTest(i,f,val){const v=gv(S.active);if(!v||!v.tests[i])return;v.tests[i][f]=val;saveS();}
+function upd(f,val){const v=gv(S.active);if(!v)return;v[f]=val;saveS();if(['status','name'].includes(f))renderSidebar();}
+
+// ─── RUN ──────────────────────────────────────────────────────────────────────
+function resolvePrompt(v,overrideUser){
+  let sys=v.systemPrompt,user=overrideUser??v.userMessage;
+  (v.variables||[]).forEach(r=>{if(r.key){const re=new RegExp(`\\{\\{${escRe(r.key)}\\}\\}`,'g');sys=sys.replace(re,r.value);user=user.replace(re,r.value);}});
+  return{sys,user};
+}
+
+function buildRun(v,{testCase=null,resolved}={}){
+  return{
+    id:uid(),vid:v.id,vname:v.name,provider:v.provider,model:v.model,out:'',streaming:true,ts:Date.now(),ms:0,it:0,ot:0,rating:0,
+    testCase:testCase?{id:testCase.id,name:testCase.name,expectedContains:testCase.expectedContains||''}:null,
+    pass:null,
+    snapshot:{
+      systemPrompt:v.systemPrompt,userMessage:testCase?.userMessage??v.userMessage,variables:clone(v.variables||[]),
+      resolvedSystemPrompt:resolved.sys,resolvedUserMessage:resolved.user,
+      temperature:v.temperature,maxTokens:v.maxTokens,notes:v.notes||''
+    }
+  };
+}
+
+async function executeRun(v,{testCase=null,quiet=false}={}){
+  const key=gk(v.provider);
+  if(!key)throw new Error(`No key for ${P[v.provider]?.name}. Click "manage keys"`);
+  const resolved=resolvePrompt(v,testCase?.userMessage);
+  const run=buildRun(v,{testCase,resolved}),t0=Date.now();
+  S.runs.unshift(run);renderRuns();
+  try{
+    const usage=await P[v.provider].run(key,resolved.sys,resolved.user,v.model,v.temperature,v.maxTokens,chunk=>{
+      const live=S.runs.find(r=>r.id===run.id);
+      if(live){live.out+=chunk;const el=document.getElementById('ro_'+run.id);if(el)el.textContent=live.out;}
+    });
+    run.streaming=false;run.ms=Date.now()-t0;run.it=usage.it;run.ot=usage.ot;
+    if(testCase?.expectedContains){
+      run.pass=run.out.toLowerCase().includes(testCase.expectedContains.toLowerCase());
+    }
+    saveS();renderRuns();
+    if(!quiet)toast(`Done ${((Date.now()-t0)/1000).toFixed(1)}s · ${usage.ot} tokens`,'ok');
+    return run;
+  }catch(e){
+    run.out=`Error: ${e.message}`;run.streaming=false;run.error=true;run.ms=Date.now()-t0;
+    saveS();renderRuns();
+    throw e;
+  }
+}
+
+async function runPrompt(){
+  const v=gv(S.active);if(!v)return;
+  const btn=document.getElementById('runBtn'),suite=document.getElementById('suiteBtn'),si=document.getElementById('si');
+  btn.disabled=true;suite.disabled=true;btn.textContent='⏳';si.classList.add('on');
+  document.getElementById('stxt').textContent=`Running ${v.name} on ${P[v.provider]?.name}…`;
+  try{await executeRun(v);}
+  catch(e){toast(e.message.slice(0,60),'err');}
+  finally{btn.disabled=false;suite.disabled=false;btn.textContent='▶ run';si.classList.remove('on');}
+}
+
+async function runSuite(){
+  const v=gv(S.active);if(!v)return;
+  const tests=(v.tests||[]).filter(t=>t.userMessage?.trim());
+  if(!tests.length){toast('Add at least one test case first','err');return;}
+  const btn=document.getElementById('suiteBtn'),runBtn=document.getElementById('runBtn'),si=document.getElementById('si');
+  btn.disabled=true;runBtn.disabled=true;si.classList.add('on');
+  let passed=0,completed=0;
+  try{
+    for(const t of tests){
+      document.getElementById('stxt').textContent=`Running ${t.name||'test case'} (${completed+1}/${tests.length})…`;
+      const run=await executeRun(v,{testCase:t,quiet:true});
+      if(run.pass===true)passed++;completed++;
+    }
+    toast(`Suite complete · ${passed}/${tests.length} checks passed`,'ok');
+  }catch(e){toast(e.message.slice(0,60),'err');}
+  finally{btn.disabled=false;runBtn.disabled=false;si.classList.remove('on');}
+}
+
+// ─── RENDER RUNS ─────────────────────────────────────────────────────────────
+function renderRuns(){
+  const el=document.getElementById('rlist');
+  if(!S.runs.length){el.innerHTML='<div class="empty"><div class="big">◎</div><p>Run a prompt to see results.</p></div>';return;}
+  el.innerHTML=S.runs.slice(0,60).map(r=>{
+    const p=P[r.provider]||P.anthropic;
+    const stars=[1,2,3,4,5].map(s=>`<span class="star${r.rating>=s?' on':''}" onclick="rateRun('${r.id}',${s})">★</span>`).join('');
+    return`<div class="rcard">
+      <div class="rchead">
+        <div class="rcmeta">
+          <span class="rcver">${esc(r.vname)}</span>
+          <span class="rcprov" style="background:${p.color}20;color:${p.color};border:1px solid ${p.color}40">${p.name}</span>
+          ${r.testCase?`<span class="chip">${esc(r.testCase.name||'test case')}</span>`:''}
+          <span class="rctime">${ago(r.ts)}</span>
+          ${r.streaming?'<span class="chip" style="font-size:10px">streaming…</span>':''}
+          ${r.error?'<span style="color:var(--danger);font-size:10px">error</span>':''}
+          ${r.pass===true?'<span class="chip pass">pass</span>':''}
+          ${r.pass===false?'<span class="chip fail">fail</span>':''}
+        </div>
+        <div class="rcstats">
+          ${!r.streaming&&r.ms?`<span class="stat"><strong>${(r.ms/1000).toFixed(1)}s</strong></span>`:''}
+          ${r.ot?`<span class="tbadge">${r.ot}tok</span>`:''}
+        </div>
+      </div>
+      <div class="rcbody"><div class="rcout" id="ro_${r.id}">${esc(r.out)}</div></div>
+      ${r.snapshot?`<div class="snap">snapshot saved · ${esc(r.snapshot.resolvedUserMessage||'')}</div>`:''}
+      <div class="rcrating">
+        <span class="rlabel">rate:</span>${stars}
+        <div class="sp"></div>
+        <button class="btn btn-sm btn-g btn-d" onclick="delRun('${r.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function rateRun(id,score){
+  const r=S.runs.find(x=>x.id===id);if(!r)return;r.rating=score;saveS();
+  recomputeScore(r.vid);saveS();renderSidebar();
+  renderRuns();
+}
+function delRun(id){const r=S.runs.find(x=>x.id===id);S.runs=S.runs.filter(run=>run.id!==id);if(r)recomputeScore(r.vid);saveS();renderRuns();renderSidebar();}
+function clearRuns(){if(!confirm('Clear all runs?'))return;S.runs=[];S.versions.forEach(v=>v.avgScore=null);saveS();renderRuns();renderSidebar();}
+
+// ─── COMPARE ─────────────────────────────────────────────────────────────────
+function switchTab(t){
+  document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.t===t));
+  document.getElementById('editorTab').style.display=t==='editor'?'flex':'none';
+  document.getElementById('compareTab').classList.toggle('on',t==='compare');
+  if(t==='compare')fillCmpSelects();
+}
+
+function fillCmpSelects(){
+  const opts=S.versions.map(v=>`<option value="${v.id}">${esc(v.name)} (${P[v.provider]?.name||v.provider})</option>`).join('');
+  document.getElementById('cmpA').innerHTML=opts;
+  document.getElementById('cmpB').innerHTML=opts;
+  if(S.versions.length>=2)document.getElementById('cmpB').selectedIndex=1;
+  if(S.versions.length<2)document.getElementById('cmpResults').innerHTML='<p class="hint">Create at least two versions to compare them.</p>';
+}
+
+async function runCompare(){
+  const idA=document.getElementById('cmpA').value,idB=document.getElementById('cmpB').value;
+  if(idA===idB){toast('Pick two different versions','err');return;}
+  const vA=gv(idA),vB=gv(idB);
+  const kA=gk(vA.provider),kB=gk(vB.provider);
+  if(!kA){toast(`No key for ${P[vA.provider]?.name}`,'err');return;}
+  if(!kB){toast(`No key for ${P[vB.provider]?.name}`,'err');return;}
+  document.getElementById('cmpResults').innerHTML='<p style="color:var(--muted);font-size:12px;font-style:italic;margin-top:12px">Running both in parallel…</p>';
+
+  const runOne=async(v,k)=>{
+    let sys=v.systemPrompt,user=v.userMessage;
+    (v.variables||[]).forEach(r=>{if(r.key){const re=new RegExp(`\\{\\{${r.key}\\}\\}`,'g');sys=sys.replace(re,r.value);user=user.replace(re,r.value);}});
+    let out='';await P[v.provider].run(k,sys,user,v.model,v.temperature,v.maxTokens,c=>out+=c);return out;
+  };
+
+  try{
+    const[oA,oB]=await Promise.all([runOne(vA,kA),runOne(vB,kB)]);
+    const sim=cosSim(oA,oB);
+    const pA=P[vA.provider],pB=P[vB.provider];
+    document.getElementById('cmpResults').innerHTML=`
+      <div class="cgrid" style="margin-top:12px">
+        <div class="ccard">
+          <div class="ctitle"><span class="pdot" style="background:${pA.color}"></span>${esc(vA.name)} · ${pA.name}</div>
+          <div class="ctext">${esc(oA)}</div>
+        </div>
+        <div class="ccard">
+          <div class="ctitle"><span class="pdot" style="background:${pB.color}"></span>${esc(vB.name)} · ${pB.name}</div>
+          <div class="ctext">${esc(oB)}</div>
+        </div>
+      </div>
+      <div style="margin-top:11px">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:5px">output similarity: <strong style="color:var(--text)">${Math.round(sim*100)}%</strong></div>
+        <div class="dbar"><div class="dfill" style="width:${sim*100}%"></div></div>
+      </div>
+      <div class="diff">
+        ${renderDiffRow('System prompt',vA.systemPrompt,vB.systemPrompt)}
+        ${renderDiffRow('User message',vA.userMessage,vB.userMessage)}
+        ${renderDiffRow('Settings',`${vA.model} · temp ${vA.temperature} · ${vA.maxTokens} max tokens`,`${vB.model} · temp ${vB.temperature} · ${vB.maxTokens} max tokens`)}
+      </div>`;
+    toast('Comparison done','ok');
+  }catch(e){document.getElementById('cmpResults').innerHTML=`<p style="color:var(--danger);margin-top:12px">Error: ${e.message}</p>`;}
+}
+
+const cosSim=(a,b)=>{const wA=new Set(a.toLowerCase().split(/\W+/).filter(Boolean)),wB=new Set(b.toLowerCase().split(/\W+/).filter(Boolean));return[...wA].filter(w=>wB.has(w)).length/(Math.sqrt(wA.size)*Math.sqrt(wB.size)||1);};
+
+// ─── IMPORT / EXPORT ─────────────────────────────────────────────────────────
+function doExport(){
+  const b=new Blob([JSON.stringify({versions:S.versions,runs:S.runs},null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`prompt-lab-${new Date().toISOString().slice(0,10)}.json`;a.click();
+  toast('Exported!','ok');
+}
+function doImport(){document.getElementById('importFile').click();}
+function handleImport(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();r.onload=ev=>{
+    try{
+      const d=JSON.parse(ev.target.result);
+      if(!Array.isArray(d.versions))throw new Error('missing versions');
+      const importedVersions=d.versions.map(normalizeVersion).map(v=>({...v,id:uid()}));
+      const idMap=new Map(d.versions.map((v,i)=>[v.id,importedVersions[i].id]));
+      const importedRuns=(d.runs||[]).map(normalizeRun).map(r=>({...r,id:uid(),vid:idMap.get(r.vid)||r.vid}));
+      S.versions=[...importedVersions,...S.versions];
+      S.runs=[...importedRuns,...S.runs];
+      recomputeAllScores();saveS();renderSidebar();renderRuns();toast(`Imported ${importedVersions.length} version(s)`,'ok');
+    }
+    catch{toast('Invalid file','err');}
+  };r.readAsText(f);e.target.value='';
+}
+
+// ─── UTILS ───────────────────────────────────────────────────────────────────
+const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+const escRe=s=>String(s||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+const clone=x=>JSON.parse(JSON.stringify(x));
+const ago=ts=>{const s=Math.floor((Date.now()-ts)/1000);if(s<60)return'just now';if(s<3600)return`${Math.floor(s/60)}m ago`;if(s<86400)return`${Math.floor(s/3600)}h ago`;return`${Math.floor(s/86400)}d ago`;};
+function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.className='toast',2800);}
+function defaultTest(name='smoke test'){return{id:uid(),name,userMessage:'Tell me something interesting.',expectedContains:''};}
+function normalizeVersion(v={}){
+  const provider=P[v.provider]?v.provider:'anthropic';
+  return{
+    id:v.id||uid(),name:v.name||'untitled',status:['draft','tested','archived'].includes(v.status)?v.status:'draft',
+    systemPrompt:v.systemPrompt||'',userMessage:v.userMessage||'',provider,
+    model:v.model||P[provider].models[0].id,temperature:Number.isFinite(v.temperature)?v.temperature:0.7,
+    maxTokens:Number.isFinite(v.maxTokens)?v.maxTokens:1024,variables:Array.isArray(v.variables)?v.variables:[],
+    tests:Array.isArray(v.tests)&&v.tests.length?v.tests.map(t=>({id:t.id||uid(),name:t.name||'test case',userMessage:t.userMessage||'',expectedContains:t.expectedContains||''})):[defaultTest()],
+    createdAt:v.createdAt||Date.now(),avgScore:v.avgScore??null,notes:v.notes||''
+  };
+}
+function normalizeRun(r={}){
+  return{
+    id:r.id||uid(),vid:r.vid||'',vname:r.vname||'unknown',provider:P[r.provider]?r.provider:'anthropic',model:r.model||'',
+    out:r.out||'',streaming:false,ts:r.ts||Date.now(),ms:r.ms||0,it:r.it||0,ot:r.ot||0,rating:r.rating||0,error:!!r.error,
+    testCase:r.testCase||null,pass:r.pass??null,snapshot:r.snapshot||null
+  };
+}
+function recomputeScore(vid){
+  const vr=S.runs.filter(x=>x.vid===vid&&x.rating>0);
+  const v=gv(vid);if(v)v.avgScore=vr.length?vr.reduce((s,x)=>s+x.rating,0)/vr.length:null;
+}
+function recomputeAllScores(){S.versions.forEach(v=>recomputeScore(v.id));}
+function renderDiffRow(label,a,b){
+  const same=a===b;
+  return`<div class="diffrow"><strong>${label}${same?' · unchanged':''}</strong><p>${same?esc(a):`A: ${esc(a)}\n\nB: ${esc(b)}`}</p></div>`;
+}
+</script>
+</body>
+</html>
