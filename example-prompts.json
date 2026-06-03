@@ -49,6 +49,31 @@
       "createdAt": 1700086400000,
       "avgScore": 4.5,
       "notes": "Much better. The open question format is a hit."
+    },
+    {
+      "id": "example003",
+      "name": "v3 — OpenRouter cross-check",
+      "status": "draft",
+      "systemPrompt": "You are an expert summarization assistant. Prefer crisp structure over prose. Always include TL;DR, bullets, and one risk or caveat.",
+      "userMessage": "Please summarize this for a busy product builder:\n\n{{text}}",
+      "provider": "openrouter",
+      "model": "openai/gpt-4.1",
+      "temperature": 0.4,
+      "maxTokens": 900,
+      "variables": [
+        { "key": "text", "value": "Paste your text here to summarize it." }
+      ],
+      "tests": [
+        {
+          "id": "example003_case001",
+          "name": "cross-provider structure",
+          "userMessage": "Please summarize this for a busy product builder:\n\n{{text}}",
+          "expectedContains": "TL;DR"
+        }
+      ],
+      "createdAt": 1700172800000,
+      "avgScore": null,
+      "notes": "Use this to compare an OpenRouter-routed model against the Claude-native version."
     }
   ],
   "runs": []

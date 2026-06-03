@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Prompt Lab — Claude prompt versioning + evals</title>
+<title>Prompt Lab — multi-provider prompt versioning + evals</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -207,20 +207,20 @@ code{background:var(--s3);padding:1px 5px;border-radius:4px;font-size:11px;color
 <div class="overlay" id="keysModal">
   <div class="modal">
     <h2>Prompt Lab</h2>
-    <p class="msub">Prompt versioning, side-by-side comparison, and lightweight evals for Claude in one self-contained file.</p>
+    <p class="msub">Prompt versioning, side-by-side comparison, and lightweight evals across Anthropic, OpenAI, Gemini, and OpenRouter.</p>
     <div class="privacy">
       <p>🔒 <strong>Your API keys never leave your browser.</strong><br>
-      Keys are stored only in your browser's <code>localStorage</code> — no backend, no analytics, no tracking. API calls go directly from your browser to Anthropic. <strong>Use this as a local dev tool, not a public hosted app.</strong></p>
+      Keys are stored only in your browser's <code>localStorage</code> — no backend, no analytics, no tracking. API calls go directly from your browser to the selected provider. <strong>Use this as a local dev tool, not a public hosted app.</strong></p>
     </div>
     <div id="keysList"></div>
     <button class="btn btn-a" onclick="saveKeys()" style="width:100%;margin-top:8px">Start building →</button>
-    <p style="font-size:10px;color:var(--muted);margin-top:9px;text-align:center">You only need one Anthropic key to start testing Claude prompts.</p>
+    <p style="font-size:10px;color:var(--muted);margin-top:9px;text-align:center">Add one key to start. Add more when you want cross-provider comparisons.</p>
   </div>
 </div>
 
 <div class="app">
   <header>
-    <div class="logo">Prompt Lab <span>Claude versioning + evals</span></div>
+    <div class="logo">Prompt Lab <span>multi-provider evals</span></div>
     <div class="hactions">
       <button class="btn btn-sm btn-g" onclick="openKeys()">🔑 manage keys</button>
       <button class="btn btn-sm btn-g" onclick="doExport()">↓ export</button>
@@ -300,10 +300,10 @@ code{background:var(--s3);padding:1px 5px;border-radius:4px;font-size:11px;color
 // ─── PROVIDERS ────────────────────────────────────────────────────────────────
 const P = {
   anthropic: {
-    name:'Anthropic', color:'#c8a882',
-    hint:'sk-ant-...', docs:'https://console.anthropic.com/keys',
+    name:'Anthropic', color:'#c8a882', mark:'A',
+    hint:'sk-ant-...', docs:'https://console.anthropic.com/keys', cors:'direct browser API supported with Anthropic browser-access header',
     models:[
-      {id:'claude-sonnet-4-20250514',label:'Claude Sonnet 4 ✦'},
+      {id:'claude-sonnet-4-20250514',label:'Claude Sonnet 4'},
       {id:'claude-opus-4-20250514',label:'Claude Opus 4'},
       {id:'claude-haiku-4-5-20251001',label:'Claude Haiku 4.5 (fast)'},
     ],
@@ -313,27 +313,124 @@ const P = {
         headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
         body:JSON.stringify({model,max_tokens:maxt,temperature:temp,system:sys,messages:[{role:'user',content:user}],stream:true})
       });
-      if(!r.ok){const e=await r.json();throw new Error(e.error?.message||`HTTP ${r.status}`)}
+      if(!r.ok)throw new Error(await readErr(r));
       const rd=r.body.getReader(),dc=new TextDecoder();
-      let it=0,ot=0;
+      let it=0,ot=0,buf='';
       while(true){
         const{done,value}=await rd.read();if(done)break;
-        for(const ln of dc.decode(value).split('\n')){
-          if(!ln.startsWith('data: '))continue;
-          const d=ln.slice(6).trim();if(d==='[DONE]')continue;
-          try{const ev=JSON.parse(d);
-            if(ev.type==='content_block_delta'&&ev.delta?.text)cb(ev.delta.text);
-            if(ev.type==='message_start'&&ev.message?.usage)it=ev.message.usage.input_tokens;
-            if(ev.type==='message_delta'&&ev.usage)ot=ev.usage.output_tokens;
-          }catch(e){}
+        buf+=dc.decode(value,{stream:true});
+        const parts=buf.split('\n\n');buf=parts.pop()||'';
+        for(const block of parts){
+          for(const ln of block.split('\n')){
+            if(!ln.startsWith('data: '))continue;
+            const d=ln.slice(6).trim();if(d==='[DONE]')continue;
+            try{const ev=JSON.parse(d);
+              if(ev.type==='content_block_delta'&&ev.delta?.text)cb(ev.delta.text);
+              if(ev.type==='message_start'&&ev.message?.usage)it=ev.message.usage.input_tokens||0;
+              if(ev.type==='message_delta'&&ev.usage)ot=ev.usage.output_tokens||0;
+            }catch(e){}
+          }
         }
       }
       return{it,ot};
     }
+  },
+  openai:{
+    name:'OpenAI', color:'#10a37f', mark:'O',
+    hint:'sk-...', docs:'https://platform.openai.com/api-keys', cors:'may require a local proxy if browser CORS blocks direct API calls',
+    models:[
+      {id:'gpt-4.1',label:'GPT-4.1'},
+      {id:'gpt-4.1-mini',label:'GPT-4.1 mini'},
+      {id:'gpt-4o',label:'GPT-4o'},
+      {id:'gpt-4o-mini',label:'GPT-4o mini'},
+    ],
+    run:(key,sys,user,model,temp,maxt,cb)=>runOpenAICompat({
+      url:'https://api.openai.com/v1/chat/completions', key, sys, user, model, temp, maxt, cb,
+      headers:{'Authorization':`Bearer ${key}`}
+    })
+  },
+  gemini:{
+    name:'Google Gemini', color:'#4285f4', mark:'G',
+    hint:'AIza...', docs:'https://aistudio.google.com/app/apikey', cors:'uses Google Gemini REST streaming API',
+    models:[
+      {id:'gemini-2.5-pro',label:'Gemini 2.5 Pro'},
+      {id:'gemini-2.5-flash',label:'Gemini 2.5 Flash'},
+      {id:'gemini-2.5-flash-lite',label:'Gemini 2.5 Flash-Lite'},
+      {id:'gemini-2.0-flash',label:'Gemini 2.0 Flash'},
+    ],
+    async run(key,sys,user,model,temp,maxt,cb){
+      const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}:streamGenerateContent?alt=sse`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-goog-api-key':key},
+        body:JSON.stringify({system_instruction:{parts:[{text:sys}]},contents:[{role:'user',parts:[{text:user}]}],generationConfig:{temperature:temp,maxOutputTokens:maxt}})
+      });
+      if(!r.ok)throw new Error(await readErr(r));
+      const rd=r.body.getReader(),dc=new TextDecoder();
+      let it=0,ot=0,buf='';
+      while(true){
+        const{done,value}=await rd.read();if(done)break;
+        buf+=dc.decode(value,{stream:true});
+        const blocks=buf.split('\n\n');buf=blocks.pop()||'';
+        for(const block of blocks){
+          for(const ln of block.split('\n')){
+            if(!ln.startsWith('data: '))continue;
+            try{const ev=JSON.parse(ln.slice(6).trim());
+              const txt=(ev.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('');if(txt)cb(txt);
+              if(ev.usageMetadata){it=ev.usageMetadata.promptTokenCount||0;ot=ev.usageMetadata.candidatesTokenCount||0;}
+            }catch(e){}
+          }
+        }
+      }
+      return{it,ot};
+    }
+  },
+  openrouter:{
+    name:'OpenRouter', color:'#7c5cff', mark:'R',
+    hint:'sk-or-...', docs:'https://openrouter.ai/keys', cors:'OpenAI-compatible router; model IDs are editable',
+    models:[
+      {id:'anthropic/claude-sonnet-4',label:'Claude Sonnet 4 via OpenRouter'},
+      {id:'openai/gpt-4.1',label:'GPT-4.1 via OpenRouter'},
+      {id:'google/gemini-2.5-pro',label:'Gemini 2.5 Pro via OpenRouter'},
+      {id:'meta-llama/llama-3.3-70b-instruct',label:'Llama 3.3 70B via OpenRouter'},
+    ],
+    run:(key,sys,user,model,temp,maxt,cb)=>runOpenAICompat({
+      url:'https://openrouter.ai/api/v1/chat/completions', key, sys, user, model, temp, maxt, cb,
+      headers:{'Authorization':`Bearer ${key}`,'HTTP-Referer':location.origin||'http://localhost','X-Title':'Prompt Lab'}
+    })
   }
 };
-const PIDS=['anthropic'];
-const PMARKS={anthropic:'A'};
+const PIDS=Object.keys(P);
+const PMARKS=Object.fromEntries(PIDS.map(id=>[id,P[id].mark||P[id].name[0]]));
+
+async function readErr(r){
+  try{const e=await r.json();return e.error?.message||e.message||`HTTP ${r.status}`;}
+  catch{return `HTTP ${r.status}`;}
+}
+
+async function runOpenAICompat({url,sys,user,model,temp,maxt,cb,headers={}}){
+  const r=await fetch(url,{
+    method:'POST',
+    headers:{'Content-Type':'application/json',...headers},
+    body:JSON.stringify({model,max_tokens:maxt,temperature:temp,messages:[{role:'system',content:sys},{role:'user',content:user}],stream:true,stream_options:{include_usage:true}})
+  });
+  if(!r.ok)throw new Error(await readErr(r));
+  const rd=r.body.getReader(),dc=new TextDecoder();
+  let it=0,ot=0,buf='';
+  while(true){
+    const{done,value}=await rd.read();if(done)break;
+    buf+=dc.decode(value,{stream:true});
+    const lines=buf.split('\n');buf=lines.pop()||'';
+    for(const ln of lines){
+      if(!ln.startsWith('data: '))continue;
+      const d=ln.slice(6).trim();if(!d||d==='[DONE]')continue;
+      try{const ev=JSON.parse(d);
+        const t=ev.choices?.[0]?.delta?.content;if(t)cb(t);
+        if(ev.usage){it=ev.usage.prompt_tokens||it;ot=ev.usage.completion_tokens||ot;}
+      }catch(e){}
+    }
+  }
+  return{it,ot};
+}
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let S={versions:[],runs:[],active:null};
@@ -482,10 +579,12 @@ function renderEditor(){
         </div>`).join('')}</div>
     </div>
     <div class="fg">
-      <label class="fl">Model</label>
-      <select id="msel" onchange="upd('model',this.value)">
-        ${p.models.map(m=>`<option value="${m.id}"${v.model===m.id?' selected':''}>${m.label}</option>`).join('')}
-      </select>
+      <label class="fl">Model <span style="font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0">— editable, saved with every run</span></label>
+      <input type="text" list="modelOptions_${v.id}" value="${esc(v.model)}" oninput="upd('model',this.value)">
+      <datalist id="modelOptions_${v.id}">
+        ${p.models.map(m=>`<option value="${esc(m.id)}">${esc(m.label)}</option>`).join('')}
+      </datalist>
+      <p class="hint">${esc(p.cors||'Direct browser call to provider API.')}</p>
       ${!hasKey?`<p class="nokey">⚠ No key for ${p.name}. <button class="btn btn-sm btn-g" onclick="openKeys()" style="padding:2px 7px">add key</button></p>`:''}
     </div>
     <div class="divider"></div>
@@ -576,6 +675,7 @@ function buildRun(v,{testCase=null,resolved}={}){
     testCase:testCase?{id:testCase.id,name:testCase.name,expectedContains:testCase.expectedContains||''}:null,
     pass:null,
     snapshot:{
+      provider:v.provider,providerName:P[v.provider]?.name||v.provider,model:v.model,
       systemPrompt:v.systemPrompt,userMessage:testCase?.userMessage??v.userMessage,variables:clone(v.variables||[]),
       resolvedSystemPrompt:resolved.sys,resolvedUserMessage:resolved.user,
       temperature:v.temperature,maxTokens:v.maxTokens,notes:v.notes||''
@@ -602,9 +702,12 @@ async function executeRun(v,{testCase=null,quiet=false}={}){
     if(!quiet)toast(`Done ${((Date.now()-t0)/1000).toFixed(1)}s · ${usage.ot} tokens`,'ok');
     return run;
   }catch(e){
-    run.out=`Error: ${e.message}`;run.streaming=false;run.error=true;run.ms=Date.now()-t0;
+    const msg=e.message==='Failed to fetch'
+      ? 'Failed to fetch. This provider may block direct browser calls; use OpenRouter for cross-provider testing or add a small backend proxy for production.'
+      : e.message;
+    run.out=`Error: ${msg}`;run.streaming=false;run.error=true;run.ms=Date.now()-t0;
     saveS();renderRuns();
-    throw e;
+    throw new Error(msg);
   }
 }
 
@@ -624,14 +727,15 @@ async function runSuite(){
   if(!tests.length){toast('Add at least one test case first','err');return;}
   const btn=document.getElementById('suiteBtn'),runBtn=document.getElementById('runBtn'),si=document.getElementById('si');
   btn.disabled=true;runBtn.disabled=true;si.classList.add('on');
-  let passed=0,completed=0;
+  let passed=0,checked=0,completed=0;
   try{
     for(const t of tests){
       document.getElementById('stxt').textContent=`Running ${t.name||'test case'} (${completed+1}/${tests.length})…`;
       const run=await executeRun(v,{testCase:t,quiet:true});
-      if(run.pass===true)passed++;completed++;
+      if(run.pass!==null){checked++;if(run.pass===true)passed++;}
+      completed++;
     }
-    toast(`Suite complete · ${passed}/${tests.length} checks passed`,'ok');
+    toast(checked?`Suite complete · ${passed}/${checked} checks passed`:`Suite complete · ${tests.length} run(s)`,'ok');
   }catch(e){toast(e.message.slice(0,60),'err');}
   finally{btn.disabled=false;runBtn.disabled=false;si.classList.remove('on');}
 }
@@ -648,6 +752,7 @@ function renderRuns(){
         <div class="rcmeta">
           <span class="rcver">${esc(r.vname)}</span>
           <span class="rcprov" style="background:${p.color}20;color:${p.color};border:1px solid ${p.color}40">${p.name}</span>
+          <span class="tbadge">${esc(r.model||'model unknown')}</span>
           ${r.testCase?`<span class="chip">${esc(r.testCase.name||'test case')}</span>`:''}
           <span class="rctime">${ago(r.ts)}</span>
           ${r.streaming?'<span class="chip" style="font-size:10px">streaming…</span>':''}
@@ -661,7 +766,7 @@ function renderRuns(){
         </div>
       </div>
       <div class="rcbody"><div class="rcout" id="ro_${r.id}">${esc(r.out)}</div></div>
-      ${r.snapshot?`<div class="snap">snapshot saved · ${esc(r.snapshot.resolvedUserMessage||'')}</div>`:''}
+      ${r.snapshot?`<div class="snap">tested model: ${esc(r.snapshot.providerName||p.name)} / ${esc(r.snapshot.model||r.model)} · snapshot saved · ${esc(r.snapshot.resolvedUserMessage||'')}</div>`:''}
       <div class="rcrating">
         <span class="rlabel">rate:</span>${stars}
         <div class="sp"></div>
@@ -705,8 +810,7 @@ async function runCompare(){
   document.getElementById('cmpResults').innerHTML='<p style="color:var(--muted);font-size:12px;font-style:italic;margin-top:12px">Running both in parallel…</p>';
 
   const runOne=async(v,k)=>{
-    let sys=v.systemPrompt,user=v.userMessage;
-    (v.variables||[]).forEach(r=>{if(r.key){const re=new RegExp(`\\{\\{${r.key}\\}\\}`,'g');sys=sys.replace(re,r.value);user=user.replace(re,r.value);}});
+    const {sys,user}=resolvePrompt(v);
     let out='';await P[v.provider].run(k,sys,user,v.model,v.temperature,v.maxTokens,c=>out+=c);return out;
   };
 
@@ -717,11 +821,11 @@ async function runCompare(){
     document.getElementById('cmpResults').innerHTML=`
       <div class="cgrid" style="margin-top:12px">
         <div class="ccard">
-          <div class="ctitle"><span class="pdot" style="background:${pA.color}"></span>${esc(vA.name)} · ${pA.name}</div>
+          <div class="ctitle"><span class="pdot" style="background:${pA.color}"></span>${esc(vA.name)} · ${pA.name} · ${esc(vA.model)}</div>
           <div class="ctext">${esc(oA)}</div>
         </div>
         <div class="ccard">
-          <div class="ctitle"><span class="pdot" style="background:${pB.color}"></span>${esc(vB.name)} · ${pB.name}</div>
+          <div class="ctitle"><span class="pdot" style="background:${pB.color}"></span>${esc(vB.name)} · ${pB.name} · ${esc(vB.model)}</div>
           <div class="ctext">${esc(oB)}</div>
         </div>
       </div>
@@ -732,7 +836,8 @@ async function runCompare(){
       <div class="diff">
         ${renderDiffRow('System prompt',vA.systemPrompt,vB.systemPrompt)}
         ${renderDiffRow('User message',vA.userMessage,vB.userMessage)}
-        ${renderDiffRow('Settings',`${vA.model} · temp ${vA.temperature} · ${vA.maxTokens} max tokens`,`${vB.model} · temp ${vB.temperature} · ${vB.maxTokens} max tokens`)}
+        ${renderDiffRow('Provider / model',`${pA.name} · ${vA.model}`,`${pB.name} · ${vB.model}`)}
+        ${renderDiffRow('Settings',`temp ${vA.temperature} · ${vA.maxTokens} max tokens`,`temp ${vB.temperature} · ${vB.maxTokens} max tokens`)}
       </div>`;
     toast('Comparison done','ok');
   }catch(e){document.getElementById('cmpResults').innerHTML=`<p style="color:var(--danger);margin-top:12px">Error: ${e.message}</p>`;}
