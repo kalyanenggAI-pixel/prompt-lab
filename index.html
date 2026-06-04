@@ -25,7 +25,7 @@ header{border-bottom:1px solid var(--border);padding:13px 22px;display:flex;alig
 .hactions{display:flex;align-items:center;gap:7px;flex-wrap:wrap}
 
 /* MAIN GRID */
-.main{display:grid;grid-template-columns:280px minmax(520px,1fr) 330px;height:calc(100vh - 50px);overflow:hidden}
+.main{display:grid;grid-template-columns:260px minmax(480px,1fr) clamp(420px,30vw,560px);height:calc(100vh - 50px);overflow:hidden}
 
 /* SIDEBAR */
 .sidebar{border-right:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);overflow:hidden}
@@ -76,6 +76,30 @@ select option{background:var(--s2)}
 .metricrow{display:flex;gap:7px;flex-wrap:wrap}
 .metric{font-size:11px;padding:4px 8px;border-radius:999px;background:var(--s2);border:1px solid var(--border);color:var(--muted)}
 .metric strong{color:var(--text)}
+.guide{background:linear-gradient(135deg,rgba(200,240,96,.08),rgba(96,191,240,.04));border:1px solid rgba(200,240,96,.18);border-radius:var(--rl);padding:14px 15px}
+.guide h3{font-family:var(--display);font-size:17px;font-weight:400;color:var(--accent);margin-bottom:4px}
+.guide p{font-size:12px;color:var(--muted);line-height:1.75;max-width:760px}
+.section{background:rgba(255,255,255,.015);border:1px solid var(--border);border-radius:var(--rl);padding:13px;display:flex;flex-direction:column;gap:11px}
+.stephead{display:flex;gap:10px;align-items:flex-start}
+.stepnum{width:24px;height:24px;border-radius:999px;background:var(--accent);color:#0a0a0c;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;flex-shrink:0}
+.stepcopy strong{font-size:13px;color:var(--text)}
+.stepcopy p{font-size:11px;color:var(--muted);line-height:1.6;margin-top:2px}
+.optional{border:1px solid var(--border);border-radius:var(--rl);background:rgba(255,255,255,.01);overflow:hidden}
+.optional summary{cursor:pointer;list-style:none;padding:11px 13px;color:var(--text);font-size:12px;display:flex;align-items:center;justify-content:space-between}
+.optional summary::-webkit-details-marker{display:none}
+.optional summary::after{content:'+';color:var(--muted)}
+.optional[open] summary::after{content:'−'}
+.optional-body{padding:0 13px 13px;display:flex;flex-direction:column;gap:10px}
+.provider-select{display:grid;grid-template-columns:minmax(180px,260px) 1fr;gap:10px;align-items:start}
+.model-tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.model-meta{font-size:11px;color:var(--muted)}
+.warnbox{font-size:11px;line-height:1.65;color:var(--a3);border:1px solid rgba(240,160,96,.25);background:rgba(240,160,96,.07);border-radius:var(--r);padding:8px 10px}
+.warnbox strong{color:var(--text)}
+.model-warning{padding:7px 11px;border-bottom:1px solid var(--border);font-size:11px;line-height:1.6;color:var(--a3);background:rgba(240,160,96,.06)}
+.freebadge{font-size:10px;padding:2px 7px;border-radius:999px;background:rgba(96,240,160,.12);color:var(--ok);border:1px solid rgba(96,240,160,.22)}
+.costbox{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:6px}
+.costpill{font-size:10px;color:var(--muted);border:1px solid var(--border);background:rgba(255,255,255,.015);border-radius:var(--r);padding:6px 8px}
+.costpill strong{display:block;color:var(--text);font-size:12px;margin-top:1px}
 
 /* PROVIDER GRID */
 .pgrid{display:grid;grid-template-columns:1fr 1fr;gap:5px}
@@ -92,19 +116,33 @@ select option{background:var(--s2)}
 .rpane{border-left:1px solid var(--border);display:flex;flex-direction:column;background:var(--surface);overflow:hidden}
 .rhead{padding:9px 13px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px;flex-shrink:0}
 .rtitle{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted)}
-.rlist{flex:1;overflow-y:auto;padding:7px;display:flex;flex-direction:column;gap:7px}
+.rlist{flex:1;overflow-y:auto;padding:8px;display:flex;flex-direction:column;gap:8px}
 .rcard{background:var(--s2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.rcard.compact{background:rgba(255,255,255,.025)}
+.rcard.latest{border-color:rgba(200,240,96,.24)}
 .rchead{padding:8px 11px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
 .rcmeta{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .rcver{font-size:11px;color:var(--accent);font-weight:500}
 .rcprov{font-size:10px;padding:1px 6px;border-radius:20px}
 .rctime{font-size:10px;color:var(--muted)}
 .rcstats{display:flex;gap:7px;flex-shrink:0}
+.model-line{padding:7px 11px;border-bottom:1px solid var(--border);font-size:11px;color:var(--muted);display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.model-line strong{color:var(--text)}
+.model-chip{font-size:10px;padding:2px 7px;border-radius:999px;background:rgba(96,191,240,.1);color:var(--a2);border:1px solid rgba(96,191,240,.18);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.actual-chip{background:rgba(200,240,96,.1);color:var(--accent);border-color:rgba(200,240,96,.2)}
 .stat{font-size:10px;color:var(--muted)}
 .stat strong{color:var(--text)}
-.rcbody{padding:9px 11px}
-.rcout{font-size:12px;color:var(--text);line-height:1.7;white-space:pre-wrap;word-break:break-word;max-height:170px;overflow-y:auto}
-.rcrating{padding:7px 11px;border-top:1px solid var(--border);display:flex;align-items:center;gap:5px}
+.rcbody{padding:10px 12px}
+.outlabel{font-size:10px;text-transform:uppercase;letter-spacing:1.1px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.rcout{font-size:12px;color:var(--text);line-height:1.75;white-space:pre-wrap;word-break:break-word;max-height:150px;overflow-y:auto}
+.rcout.exact{max-height:min(52vh,560px);font-size:13px}
+.run-details{border-top:1px solid var(--border)}
+.run-details summary{cursor:pointer;padding:8px 11px;color:var(--muted);font-size:11px;list-style:none;display:flex;gap:7px;align-items:center;justify-content:space-between}
+.run-details summary::-webkit-details-marker{display:none}
+.run-details summary::after{content:'open';font-size:10px;color:var(--a2)}
+.run-details[open] summary::after{content:'hide'}
+.preview{color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}
+.rcrating{padding:7px 11px;border-top:1px solid var(--border);display:flex;align-items:center;gap:5px;min-height:34px}
 .rlabel{font-size:10px;color:var(--muted);margin-right:2px}
 .star{cursor:pointer;font-size:14px;color:var(--border2);transition:color .1s;user-select:none}
 .star.on,.star:hover{color:var(--a3)}
@@ -112,6 +150,41 @@ select option{background:var(--s2)}
 .pass{color:var(--ok);border-color:rgba(96,240,160,.2);background:rgba(96,240,160,.1)}
 .fail{color:var(--danger);border-color:rgba(240,96,96,.2);background:rgba(240,96,96,.1)}
 .snap{font-size:10px;color:var(--muted);padding:7px 11px;border-top:1px solid var(--border);background:rgba(255,255,255,.015)}
+.focus-modal{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.68);display:flex;align-items:center;justify-content:center;padding:24px}
+.focus-modal[hidden]{display:none}
+.focus-card{width:min(920px,calc(100vw - 48px));max-height:calc(100vh - 48px);background:#111115;border:1px solid var(--border2);border-radius:18px;box-shadow:0 24px 80px rgba(0,0,0,.55);display:flex;flex-direction:column;overflow:hidden}
+.focus-head{padding:13px 15px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.focus-title{font-size:13px;color:var(--accent);font-weight:700}
+.focus-meta{font-size:11px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.focus-body{padding:15px;overflow:auto;display:flex;flex-direction:column;gap:12px}
+.focus-output{white-space:pre-wrap;word-break:break-word;line-height:1.75;font-size:14px;color:var(--text);background:#0b0b0e;border:1px solid var(--border);border-radius:12px;padding:14px;min-height:220px}
+.focus-details{border:1px solid var(--border);border-radius:12px;overflow:hidden;background:rgba(255,255,255,.015)}
+.focus-details summary{cursor:pointer;padding:10px 12px;color:var(--muted);font-size:11px;list-style:none}
+.focus-details summary::-webkit-details-marker{display:none}
+.focus-pre{white-space:pre-wrap;word-break:break-word;font-size:12px;line-height:1.6;color:var(--text);padding:0 12px 12px}
+.library-pane{padding:13px 15px;display:none;flex-direction:column;gap:13px;overflow-y:auto}
+.library-pane.on{display:flex}
+.library-head{background:linear-gradient(135deg,rgba(96,191,240,.07),rgba(200,240,96,.035));border:1px solid rgba(96,191,240,.16);border-radius:var(--rl);padding:14px 15px}
+.library-head h3{font-family:var(--display);font-size:17px;font-weight:400;color:var(--a2);margin-bottom:4px}
+.library-head p{font-size:12px;color:var(--muted);line-height:1.7;max-width:780px}
+.lib-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.lib-tools input{flex:1;min-width:240px}
+.pair-list{display:flex;flex-direction:column;gap:9px}
+.pair-card{background:var(--s2);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden}
+.pair-top{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.pair-title{font-size:12px;color:var(--accent);font-weight:700;line-height:1.5}
+.pair-meta{font-size:10px;color:var(--muted);margin-top:2px}
+.pair-body{padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.pair-box{border:1px solid var(--border);background:rgba(255,255,255,.012);border-radius:var(--r);padding:9px;min-width:0}
+.pair-box label{display:block;font-size:9px;text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);margin-bottom:5px}
+.pair-text{font-size:12px;line-height:1.65;color:var(--text);white-space:pre-wrap;word-break:break-word;max-height:160px;overflow:auto}
+.pair-actions{padding:8px 12px;border-top:1px solid var(--border);display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.memory-hits{border:1px solid rgba(96,191,240,.18);background:rgba(96,191,240,.035);border-radius:var(--rl);padding:11px;display:flex;flex-direction:column;gap:8px}
+.memory-hits h4{font-size:12px;color:var(--a2);margin:0}
+.memory-hit{border:1px solid var(--border);background:rgba(0,0,0,.16);border-radius:var(--r);padding:8px;display:flex;gap:8px;align-items:flex-start;justify-content:space-between}
+.memory-hit p{font-size:11px;color:var(--text);line-height:1.55;margin:0;max-height:54px;overflow:hidden}
+@media (max-width: 760px){.pair-body{grid-template-columns:1fr}.lib-tools input{min-width:0}}
+
 
 /* COMPARE */
 .cpanel{padding:13px 15px;display:none;flex-direction:column;gap:13px;overflow-y:auto}
@@ -196,6 +269,7 @@ code{background:var(--s3);padding:1px 5px;border-radius:4px;font-size:11px;color
   .sidebar{border-right:none;border-bottom:1px solid var(--border);max-height:260px}
   .epane{min-height:640px}
   .field-grid,.cgrid,.testgrid{grid-template-columns:1fr}
+  .provider-select{grid-template-columns:1fr}
   .pgrid{grid-template-columns:1fr}
   header{padding:12px 14px}
 }
@@ -207,7 +281,7 @@ code{background:var(--s3);padding:1px 5px;border-radius:4px;font-size:11px;color
 <div class="overlay" id="keysModal">
   <div class="modal">
     <h2>Prompt Lab</h2>
-    <p class="msub">Prompt versioning, side-by-side comparison, and lightweight evals across Anthropic, OpenAI, Gemini, and OpenRouter.</p>
+    <p class="msub">A local lab for testing one prompt across models, saving versions, and seeing which output worked best.</p>
     <div class="privacy">
       <p>🔒 <strong>Your API keys never leave your browser.</strong><br>
       Keys are stored only in your browser's <code>localStorage</code> — no backend, no analytics, no tracking. API calls go directly from your browser to the selected provider. <strong>Use this as a local dev tool, not a public hosted app.</strong></p>
@@ -220,12 +294,12 @@ code{background:var(--s3);padding:1px 5px;border-radius:4px;font-size:11px;color
 
 <div class="app">
   <header>
-    <div class="logo">Prompt Lab <span>multi-provider evals</span></div>
+    <div class="logo">Prompt Lab <span>test prompts across models</span></div>
     <div class="hactions">
-      <button class="btn btn-sm btn-g" onclick="openKeys()">🔑 manage keys</button>
-      <button class="btn btn-sm btn-g" onclick="doExport()">↓ export</button>
-      <button class="btn btn-sm btn-g" onclick="doImport()">↑ import</button>
-      <button class="btn btn-sm btn-a" onclick="newVer()">+ new version</button>
+      <button class="btn btn-sm btn-g" onclick="openKeys()">🔑 API keys</button>
+      <button class="btn btn-sm btn-g" onclick="doExport()">↓ export lab</button>
+      <button class="btn btn-sm btn-g" onclick="doImport()">↑ import lab</button>
+      <button class="btn btn-sm btn-a" onclick="newVer()">+ new prompt version</button>
     </div>
   </header>
 
@@ -233,14 +307,14 @@ code{background:var(--s3);padding:1px 5px;border-radius:4px;font-size:11px;color
     <!-- SIDEBAR -->
     <div class="sidebar">
       <div class="sb-head">
-        <span class="sb-title">Versions</span>
+        <span class="sb-title">Prompt versions</span>
         <span class="chip" id="vcount">0</span>
       </div>
       <div class="vlist" id="vlist">
         <div class="empty"><div class="big">∅</div><p>No versions yet.</p></div>
       </div>
       <div style="padding:9px;border-top:1px solid var(--border)">
-        <button class="btn" style="width:100%" onclick="newVer()">+ new version</button>
+        <button class="btn" style="width:100%" onclick="newVer()">+ new prompt version</button>
       </div>
     </div>
 
@@ -248,18 +322,19 @@ code{background:var(--s3);padding:1px 5px;border-radius:4px;font-size:11px;color
     <div class="epane">
       <div class="etoolbar">
         <div class="tabs">
-          <div class="tab active" data-t="editor" onclick="switchTab('editor')">editor</div>
-          <div class="tab" data-t="compare" onclick="switchTab('compare')">compare</div>
+          <div class="tab active" data-t="editor" onclick="switchTab('editor')">Build</div>
+          <div class="tab" data-t="compare" onclick="switchTab('compare')">Compare</div>
+          <div class="tab" data-t="library" onclick="switchTab('library')">Library</div>
         </div>
         <div class="sp"></div>
-        <button class="btn" id="suiteBtn" onclick="runSuite()" disabled>run suite</button>
-        <button class="btn btn-a" id="runBtn" onclick="runPrompt()" disabled>▶ run</button>
+        <button class="btn" id="suiteBtn" onclick="runSuite()" disabled>Run test suite</button>
+        <button class="btn btn-a" id="runBtn" onclick="runPrompt()" disabled>▶ Run prompt</button>
       </div>
       <div class="ebody" id="editorTab">
         <div style="text-align:center;color:var(--muted);padding:50px 30px">
           <div style="font-size:30px;opacity:.2;margin-bottom:10px">✎</div>
-          <p style="font-size:12px;line-height:1.8">Select a version or create a new one.</p>
-          <button class="btn btn-a" style="margin-top:14px" onclick="newVer()">+ new version</button>
+          <p style="font-size:12px;line-height:1.8">Create a prompt version to start testing.</p>
+          <button class="btn btn-a" style="margin-top:14px" onclick="newVer()">+ new prompt version</button>
         </div>
       </div>
       <div class="cpanel" id="compareTab">
@@ -276,13 +351,16 @@ code{background:var(--s3);padding:1px 5px;border-radius:4px;font-size:11px;color
         </div>
         <div id="cmpResults"></div>
       </div>
+      <div class="library-pane" id="libraryTab"></div>
     </div>
 
     <!-- RESULTS -->
     <div class="rpane">
       <div class="rhead">
-        <span class="rtitle">Run History</span>
+        <span class="rtitle">Results</span>
         <div class="sp"></div>
+        <button class="btn btn-sm btn-g" onclick="saveAllGoodRuns()">save good</button>
+        <button class="btn btn-sm btn-g" onclick="clearErrors()">clear failed</button>
         <button class="btn btn-sm btn-g" onclick="clearRuns()">clear</button>
       </div>
       <div class="si" id="si"><div class="sdot"></div><span class="stext" id="stxt">Running...</span></div>
@@ -294,6 +372,20 @@ code{background:var(--s3);padding:1px 5px;border-radius:4px;font-size:11px;color
 </div>
 
 <div class="toast" id="toast"></div>
+<div class="focus-modal" id="outputModal" hidden onclick="if(event.target.id==='outputModal')closeOutputModal()">
+  <div class="focus-card" role="dialog" aria-modal="true" aria-labelledby="focusTitle">
+    <div class="focus-head">
+      <div>
+        <div class="focus-title" id="focusTitle">Exact model response</div>
+        <div class="focus-meta" id="focusMeta"></div>
+      </div>
+      <div class="sp"></div>
+      <button class="btn btn-sm btn-g" id="focusCopy">copy</button>
+      <button class="btn btn-sm btn-g" onclick="closeOutputModal()">close</button>
+    </div>
+    <div class="focus-body" id="focusBody"></div>
+  </div>
+</div>
 <input type="file" id="importFile" accept=".json" style="display:none" onchange="handleImport(event)">
 
 <script>
@@ -313,9 +405,9 @@ const P = {
         headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
         body:JSON.stringify({model,max_tokens:maxt,temperature:temp,system:sys,messages:[{role:'user',content:user}],stream:true})
       });
-      if(!r.ok)throw new Error(await readErr(r));
+      if(!r.ok)throw await readErr(r);
       const rd=r.body.getReader(),dc=new TextDecoder();
-      let it=0,ot=0,buf='';
+      let it=0,ot=0,buf='',actualModel=model;
       while(true){
         const{done,value}=await rd.read();if(done)break;
         buf+=dc.decode(value,{stream:true});
@@ -326,13 +418,14 @@ const P = {
             const d=ln.slice(6).trim();if(d==='[DONE]')continue;
             try{const ev=JSON.parse(d);
               if(ev.type==='content_block_delta'&&ev.delta?.text)cb(ev.delta.text);
+              if(ev.type==='message_start'&&ev.message?.model)actualModel=ev.message.model;
               if(ev.type==='message_start'&&ev.message?.usage)it=ev.message.usage.input_tokens||0;
               if(ev.type==='message_delta'&&ev.usage)ot=ev.usage.output_tokens||0;
             }catch(e){}
           }
         }
       }
-      return{it,ot};
+      return{it,ot,actualModel};
     }
   },
   openai:{
@@ -364,9 +457,9 @@ const P = {
         headers:{'Content-Type':'application/json','x-goog-api-key':key},
         body:JSON.stringify({system_instruction:{parts:[{text:sys}]},contents:[{role:'user',parts:[{text:user}]}],generationConfig:{temperature:temp,maxOutputTokens:maxt}})
       });
-      if(!r.ok)throw new Error(await readErr(r));
+      if(!r.ok)throw await readErr(r);
       const rd=r.body.getReader(),dc=new TextDecoder();
-      let it=0,ot=0,buf='';
+      let it=0,ot=0,buf='',actualModel=model;
       while(true){
         const{done,value}=await rd.read();if(done)break;
         buf+=dc.decode(value,{stream:true});
@@ -375,13 +468,14 @@ const P = {
           for(const ln of block.split('\n')){
             if(!ln.startsWith('data: '))continue;
             try{const ev=JSON.parse(ln.slice(6).trim());
+              if(ev.modelVersion)actualModel=ev.modelVersion;
               const txt=(ev.candidates?.[0]?.content?.parts||[]).map(p=>p.text||'').join('');if(txt)cb(txt);
               if(ev.usageMetadata){it=ev.usageMetadata.promptTokenCount||0;ot=ev.usageMetadata.candidatesTokenCount||0;}
             }catch(e){}
           }
         }
       }
-      return{it,ot};
+      return{it,ot,actualModel};
     }
   },
   openrouter:{
@@ -401,10 +495,20 @@ const P = {
 };
 const PIDS=Object.keys(P);
 const PMARKS=Object.fromEntries(PIDS.map(id=>[id,P[id].mark||P[id].name[0]]));
+let OR={models:[],loadedAt:0,error:''};
 
+function providerError(message,raw){
+  const e=new Error(message||'Provider returned an error');
+  e.raw=raw;
+  return e;
+}
 async function readErr(r){
-  try{const e=await r.json();return e.error?.message||e.message||`HTTP ${r.status}`;}
-  catch{return `HTTP ${r.status}`;}
+  try{
+    const txt=await r.text();
+    let raw=txt,msg=`HTTP ${r.status}`;
+    try{raw=JSON.parse(txt);msg=raw.error?.message||raw.message||msg;}catch(e){if(txt)msg=txt.slice(0,500);}
+    return providerError(msg,raw);
+  }catch(e){return providerError(`HTTP ${r.status}`,null);}
 }
 
 async function runOpenAICompat({url,sys,user,model,temp,maxt,cb,headers={}}){
@@ -413,9 +517,9 @@ async function runOpenAICompat({url,sys,user,model,temp,maxt,cb,headers={}}){
     headers:{'Content-Type':'application/json',...headers},
     body:JSON.stringify({model,max_tokens:maxt,temperature:temp,messages:[{role:'system',content:sys},{role:'user',content:user}],stream:true,stream_options:{include_usage:true}})
   });
-  if(!r.ok)throw new Error(await readErr(r));
+  if(!r.ok)throw await readErr(r);
   const rd=r.body.getReader(),dc=new TextDecoder();
-  let it=0,ot=0,buf='';
+  let it=0,ot=0,buf='',actualModel=model;
   while(true){
     const{done,value}=await rd.read();if(done)break;
     buf+=dc.decode(value,{stream:true});
@@ -424,25 +528,29 @@ async function runOpenAICompat({url,sys,user,model,temp,maxt,cb,headers={}}){
       if(!ln.startsWith('data: '))continue;
       const d=ln.slice(6).trim();if(!d||d==='[DONE]')continue;
       try{const ev=JSON.parse(d);
+        if(ev.error)throw providerError(formatProviderError(ev.error),ev);
+        if(ev.model)actualModel=ev.model;
         const t=ev.choices?.[0]?.delta?.content;if(t)cb(t);
         if(ev.usage){it=ev.usage.prompt_tokens||it;ot=ev.usage.completion_tokens||ot;}
-      }catch(e){}
+      }catch(e){if(e.raw)throw e;}
     }
   }
-  return{it,ot};
+  return{it,ot,actualModel};
 }
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
-let S={versions:[],runs:[],active:null};
+let S={versions:[],runs:[],savedPairs:[],active:null};
 
 // ─── INIT ─────────────────────────────────────────────────────────────────────
 window.addEventListener('DOMContentLoaded',()=>{
+  loadORCache();
   loadS();
   renderKeysList();
   const hasKey=PIDS.some(id=>localStorage.getItem('pl_k_'+id));
   document.getElementById('keysModal').style.display=hasKey?'none':'flex';
   renderSidebar();renderRuns();
   if(S.versions.length)selVer(S.versions[0].id);
+  if(gk('openrouter'))loadOpenRouterModels(true);
 });
 
 // ─── KEYS ─────────────────────────────────────────────────────────────────────
@@ -478,13 +586,14 @@ function openKeys(){renderKeysList();document.getElementById('keysModal').style.
 function clearKey(id){sk(id,'');renderKeysList();toast(`${P[id].name} key removed`,'ok');}
 
 // ─── PERSISTENCE ──────────────────────────────────────────────────────────────
-function saveS(){localStorage.setItem('pl_s',JSON.stringify({versions:S.versions,runs:S.runs}));}
+function saveS(){localStorage.setItem('pl_s',JSON.stringify({versions:S.versions,runs:S.runs,savedPairs:S.savedPairs||[]}));}
 function loadS(){
   try{
     const r=localStorage.getItem('pl_s');if(!r)return;
     const d=JSON.parse(r);
     S.versions=(d.versions||[]).map(normalizeVersion);
     S.runs=(d.runs||[]).map(normalizeRun);
+    S.savedPairs=(d.savedPairs||d.memory||[]).map(normalizePair);
     recomputeAllScores();
   }catch(e){console.warn('Could not load saved state',e);}
 }
@@ -531,10 +640,11 @@ function renderSidebar(){
     const rc=S.runs.filter(r=>r.vid===v.id).length;
     const sc=v.avgScore!=null?`<span class="vscore">★${v.avgScore.toFixed(1)} </span>`:'';
     const bc={'draft':'bd','tested':'bt','archived':'ba'}[v.status]||'bd';
+    const statusBadge=v.status==='draft'?'':`<span class="vbadge ${bc}">${v.status}</span>`;
     return`<div class="vitem${v.id===S.active?' active':''}" onclick="selVer('${v.id}')">
       <div class="vrow1">
         <span class="vname"><span class="pdot" style="background:${p.color}"></span>${esc(v.name)}</span>
-        <span class="vbadge ${bc}">${v.status}</span>
+        ${statusBadge}
       </div>
       <div class="vmeta">${sc}${rc} run${rc!==1?'s':''} · ${ago(v.createdAt)}</div>
       <div class="vacts">
@@ -547,7 +657,7 @@ function renderSidebar(){
 
 // ─── EDITOR ───────────────────────────────────────────────────────────────────
 function emptyEditor(){
-  document.getElementById('editorTab').innerHTML='<div style="text-align:center;color:var(--muted);padding:50px 30px"><div style="font-size:30px;opacity:.2;margin-bottom:10px">✎</div><p style="font-size:12px;line-height:1.8">Select or create a version.</p><button class="btn btn-a" style="margin-top:14px" onclick="newVer()">+ new version</button></div>';
+  document.getElementById('editorTab').innerHTML='<div style="text-align:center;color:var(--muted);padding:50px 30px"><div style="font-size:30px;opacity:.2;margin-bottom:10px">✎</div><p style="font-size:12px;line-height:1.8">Create a prompt version to start testing.</p><button class="btn btn-a" style="margin-top:14px" onclick="newVer()">+ new prompt version</button></div>';
   document.getElementById('runBtn').disabled=true;
   document.getElementById('suiteBtn').disabled=true;
 }
@@ -557,81 +667,107 @@ function renderEditor(){
   const p=P[v.provider]||P.anthropic;
   const hasKey=!!gk(v.provider);
   document.getElementById('editorTab').innerHTML=`
+    <div class="guide">
+      <h3>What you are seeing</h3>
+      <p>This page builds one prompt version. Choose the model, write the instructions, then run it. Saved versions live on the left; model outputs and ratings appear on the right.</p>
+    </div>
+
     <div class="fg">
-      <label class="fl">Version name</label>
+      <label class="fl">Prompt version name</label>
       <input type="text" value="${esc(v.name)}" oninput="upd('name',this.value)" style="font-size:14px">
+      <p class="hint">Use names like support bot v2 - shorter answer so you remember what changed.</p>
     </div>
-    <div class="fg">
-      <label class="fl">Status</label>
-      <select onchange="upd('status',this.value)">
-        <option value="draft"${v.status==='draft'?' selected':''}>draft</option>
-        <option value="tested"${v.status==='tested'?' selected':''}>tested</option>
-        <option value="archived"${v.status==='archived'?' selected':''}>archived</option>
-      </select>
-    </div>
-    <div class="divider"></div>
-    <div class="fg">
-      <label class="fl">Provider</label>
-      <div class="pgrid${PIDS.length===1?' single':''}">${PIDS.map(id=>`
-        <div class="pcard${v.provider===id?' sel':''}" onclick="selProv('${id}')">
-          <span class="pmark" style="background:${P[id].color}">${PMARKS[id]||P[id].name[0]}</span>
-          <div><div class="pname">${P[id].name}</div><div class="psub">${gk(id)?'✓ key set':'no key'}</div></div>
-        </div>`).join('')}</div>
-    </div>
-    <div class="fg">
-      <label class="fl">Model <span style="font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0">— editable, saved with every run</span></label>
-      <input type="text" list="modelOptions_${v.id}" value="${esc(v.model)}" oninput="upd('model',this.value)">
-      <datalist id="modelOptions_${v.id}">
-        ${p.models.map(m=>`<option value="${esc(m.id)}">${esc(m.label)}</option>`).join('')}
-      </datalist>
-      <p class="hint">${esc(p.cors||'Direct browser call to provider API.')}</p>
-      ${!hasKey?`<p class="nokey">⚠ No key for ${p.name}. <button class="btn btn-sm btn-g" onclick="openKeys()" style="padding:2px 7px">add key</button></p>`:''}
-    </div>
-    <div class="divider"></div>
-    <div class="fg">
-      <label class="fl">System prompt <span class="tag">system</span></label>
-      <textarea id="sysPrompt" oninput="upd('systemPrompt',this.value)">${esc(v.systemPrompt)}</textarea>
-    </div>
-    <div class="fg">
-      <label class="fl">User message <span class="tag">user</span></label>
-      <textarea id="userMsg" oninput="upd('userMessage',this.value)">${esc(v.userMessage)}</textarea>
-    </div>
-    <div class="fg">
-      <label class="fl">Variables <span style="font-size:10px;color:var(--muted);text-transform:none;letter-spacing:0">— use {{key}} in prompts</span></label>
-      <div id="vars">${renderVars(v)}</div>
-      <button class="btn btn-sm btn-g" onclick="addVar()" style="margin-top:5px">+ add variable</button>
-    </div>
-    <div class="divider"></div>
-    <div class="fg">
-      <label class="fl">Test cases</label>
-      <p class="hint">Use one-off runs for exploration, and suites when you want repeatable checks across realistic inputs.</p>
-      <div class="tests" id="tests">${renderTests(v)}</div>
-      <button class="btn btn-sm btn-g" onclick="addTest()" style="margin-top:5px">+ add test case</button>
-    </div>
-    <div class="divider"></div>
-    <div class="field-grid">
-      <div class="fg">
-        <label class="fl">Temperature</label>
-        <div class="trow">
-          <input type="range" min="0" max="1" step="0.05" value="${v.temperature}"
-            oninput="upd('temperature',parseFloat(this.value));document.getElementById('tv').textContent=parseFloat(this.value).toFixed(2)">
-          <span class="tval" id="tv">${v.temperature.toFixed(2)}</span>
+
+    <div class="section">
+      <div class="stephead">
+        <span class="stepnum">1</span>
+        <div class="stepcopy"><strong>Choose the AI model to test</strong><p>The provider and model are saved with every result, so you can prove exactly what was tested.</p></div>
+      </div>
+      <div class="provider-select">
+        <div class="fg">
+          <label class="fl">Provider</label>
+          <select onchange="selProv(this.value)">
+            ${PIDS.map(id=>`<option value="${id}"${v.provider===id?' selected':''}>${P[id].name}${gk(id)?' - key set':' - no key'}</option>`).join('')}
+          </select>
+          ${!hasKey?`<p class="nokey">No key for ${p.name}. <button class="btn btn-sm btn-g" onclick="openKeys()" style="padding:2px 7px">add key</button></p>`:`<p class="hint">${p.name} key is ready.</p>`}
+        </div>
+        <div class="fg">
+          ${renderModelPicker(v,p)}
         </div>
       </div>
-      <div class="fg">
-        <label class="fl">Max tokens</label>
-        <input type="text" value="${v.maxTokens}" oninput="upd('maxTokens',parseInt(this.value)||1024)">
+    </div>
+
+    <div class="section">
+      <div class="stephead">
+        <span class="stepnum">2</span>
+        <div class="stepcopy"><strong>Write the prompt</strong><p>System prompt sets the assistant behavior. User message is the test input you send to the model.</p></div>
       </div>
+      <div class="fg">
+        <label class="fl">System prompt <span class="tag">behavior</span></label>
+        <textarea id="sysPrompt" oninput="upd('systemPrompt',this.value)">${esc(v.systemPrompt)}</textarea>
+      </div>
+      <div class="fg">
+        <label class="fl">User message <span class="tag">test input</span></label>
+        <textarea id="userMsg" oninput="upd('userMessage',this.value);refreshSimilarAnswers()">${esc(v.userMessage)}</textarea>
+      </div>
+      <div id="similarAnswers">${renderSimilarAnswers(v)}</div>
     </div>
-    <div class="fg">
-      <label class="fl">Notes</label>
-      <textarea style="min-height:55px" oninput="upd('notes',this.value)">${esc(v.notes)}</textarea>
+
+    <div class="section">
+      <div class="stephead">
+        <span class="stepnum">3</span>
+        <div class="stepcopy"><strong>Run it and judge the result</strong><p>Click Run prompt for one output. Add test cases when you want repeatable checks across several inputs.</p></div>
+      </div>
+      <div class="tests" id="tests">${renderTests(v)}</div>
+      <button class="btn btn-sm btn-g" onclick="addTest()" style="align-self:flex-start">+ add test case</button>
     </div>
+
+    <details class="optional">
+      <summary>Variables - reuse placeholders like {{customer}}</summary>
+      <div class="optional-body">
+        <p class="hint">Variables let one prompt run against different inputs without rewriting the prompt text.</p>
+        <div id="vars">${renderVars(v)}</div>
+        <button class="btn btn-sm btn-g" onclick="addVar()" style="align-self:flex-start">+ add variable</button>
+      </div>
+    </details>
+
+    <details class="optional">
+      <summary>Advanced settings</summary>
+      <div class="optional-body">
+        <div class="field-grid">
+          <div class="fg">
+            <label class="fl">Status</label>
+            <select onchange="upd('status',this.value)">
+              <option value="draft"${v.status==='draft'?' selected':''}>draft</option>
+              <option value="tested"${v.status==='tested'?' selected':''}>tested</option>
+              <option value="archived"${v.status==='archived'?' selected':''}>archived</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Max tokens</label>
+            <input type="text" value="${v.maxTokens}" oninput="upd('maxTokens',parseInt(this.value)||1024)">
+          </div>
+        </div>
+        <div class="fg">
+          <label class="fl">Temperature</label>
+          <div class="trow">
+            <input type="range" min="0" max="1" step="0.05" value="${v.temperature}"
+              oninput="upd('temperature',parseFloat(this.value));document.getElementById('tv').textContent=parseFloat(this.value).toFixed(2)">
+            <span class="tval" id="tv">${v.temperature.toFixed(2)}</span>
+          </div>
+          <p class="hint">Lower is more consistent. Higher is more varied.</p>
+        </div>
+        <div class="fg">
+          <label class="fl">Notes</label>
+          <textarea style="min-height:55px" oninput="upd('notes',this.value)">${esc(v.notes)}</textarea>
+        </div>
+      </div>
+    </details>
   `;
 }
 
 function renderVars(v){
-  if(!v.variables?.length)return'<p style="font-size:11px;color:var(--muted)">No variables.</p>';
+  if(!v.variables?.length)return'<p class="hint">No variables yet. Add one if your prompt uses placeholders like {{topic}} or {{customer}}.</p>';
   return v.variables.map((r,i)=>`<div class="varrow">
     <input class="vkey" type="text" placeholder="key" value="${esc(r.key)}" oninput="updVar(${i},'key',this.value)">
     <input type="text" placeholder="value" value="${esc(r.value)}" oninput="updVar(${i},'value',this.value)">
@@ -640,7 +776,7 @@ function renderVars(v){
 }
 
 function renderTests(v){
-  if(!v.tests?.length)return'<p style="font-size:11px;color:var(--muted)">No test cases yet.</p>';
+  if(!v.tests?.length)return'<p class="hint">No test cases yet. Add cases when you want repeatable inputs for the “Run test suite” button.</p>';
   return v.tests.map((t,i)=>`<div class="testcard">
     <div class="testhead">
       <input type="text" placeholder="case name" value="${esc(t.name)}" oninput="updTest(${i},'name',this.value)">
@@ -653,7 +789,36 @@ function renderTests(v){
   </div>`).join('');
 }
 
-function selProv(id){const v=gv(S.active);if(!v)return;v.provider=id;v.model=P[id].models[0].id;saveS();renderSidebar();renderEditor();}
+function renderModelPicker(v,p){
+  if(v.provider==='openrouter'){
+    const counts=orCounts();
+    const price=modelPricing('openrouter',v.model);
+    return`
+      <label class="fl">Model</label>
+      <div class="model-tools">
+        <button class="btn btn-sm btn-g" onclick="loadOpenRouterModels(false)">refresh OpenRouter models</button>
+        <span class="model-meta">${OR.models.length?`${counts.freeChat||0} recommended free ? ${counts.free} total free ? ${counts.paid} paid loaded`:'Load live OpenRouter catalog to see all free models.'}</span>
+      </div>
+      <select onchange="upd('model',this.value);renderEditor()">
+        ${renderOpenRouterModelOptions(v.model)}
+      </select>
+      ${renderModelPriceHint(price)}
+      ${renderOpenRouterSelectionWarning(v.model)}
+      <p class="hint">For repeatable evals, choose a specific chat model. The free router is useful for quick tries, but it may send each prompt to a different free model.</p>
+      ${OR.error?`<p class="nokey">${esc(OR.error)}</p>`:''}
+    `;
+  }
+  return`
+    <label class="fl">Model</label>
+    <input type="text" list="modelOptions_${v.id}" value="${esc(v.model)}" oninput="upd('model',this.value)">
+    <datalist id="modelOptions_${v.id}">
+      ${p.models.map(m=>`<option value="${esc(m.id)}">${esc(m.label)}</option>`).join('')}
+    </datalist>
+    <p class="hint">Start with a suggested model or paste any valid model ID. ${esc(p.cors||'')}</p>
+  `;
+}
+
+function selProv(id){const v=gv(S.active);if(!v)return;v.provider=id;v.model=P[id].models[0].id;saveS();renderSidebar();renderEditor();if(id==='openrouter'&&!OR.models.length)loadOpenRouterModels(true);}
 function addVar(){const v=gv(S.active);if(!v)return;v.variables=v.variables||[];v.variables.push({key:'',value:''});saveS();document.getElementById('vars').innerHTML=renderVars(v);}
 function rmVar(i){const v=gv(S.active);if(!v)return;v.variables.splice(i,1);saveS();document.getElementById('vars').innerHTML=renderVars(v);}
 function updVar(i,f,val){const v=gv(S.active);if(!v||!v.variables[i])return;v.variables[i][f]=val;saveS();}
@@ -671,11 +836,11 @@ function resolvePrompt(v,overrideUser){
 
 function buildRun(v,{testCase=null,resolved}={}){
   return{
-    id:uid(),vid:v.id,vname:v.name,provider:v.provider,model:v.model,out:'',streaming:true,ts:Date.now(),ms:0,it:0,ot:0,rating:0,
+    id:uid(),vid:v.id,vname:v.name,provider:v.provider,model:v.model,actualModel:'',out:'',streaming:true,ts:Date.now(),ms:0,it:0,ot:0,rating:0,cost:null,
     testCase:testCase?{id:testCase.id,name:testCase.name,expectedContains:testCase.expectedContains||''}:null,
     pass:null,
     snapshot:{
-      provider:v.provider,providerName:P[v.provider]?.name||v.provider,model:v.model,
+      provider:v.provider,providerName:P[v.provider]?.name||v.provider,model:v.model,actualModel:'',
       systemPrompt:v.systemPrompt,userMessage:testCase?.userMessage??v.userMessage,variables:clone(v.variables||[]),
       resolvedSystemPrompt:resolved.sys,resolvedUserMessage:resolved.user,
       temperature:v.temperature,maxTokens:v.maxTokens,notes:v.notes||''
@@ -686,6 +851,7 @@ function buildRun(v,{testCase=null,resolved}={}){
 async function executeRun(v,{testCase=null,quiet=false}={}){
   const key=gk(v.provider);
   if(!key)throw new Error(`No key for ${P[v.provider]?.name}. Click "manage keys"`);
+  if(v.provider==='openrouter'&&!OR.models.length)await loadOpenRouterModels(true);
   const resolved=resolvePrompt(v,testCase?.userMessage);
   const run=buildRun(v,{testCase,resolved}),t0=Date.now();
   S.runs.unshift(run);renderRuns();
@@ -695,6 +861,9 @@ async function executeRun(v,{testCase=null,quiet=false}={}){
       if(live){live.out+=chunk;const el=document.getElementById('ro_'+run.id);if(el)el.textContent=live.out;}
     });
     run.streaming=false;run.ms=Date.now()-t0;run.it=usage.it;run.ot=usage.ot;
+    run.actualModel=usage.actualModel||usage.model||v.model;
+    run.cost=estimateCost(v.provider,v.model,usage.it,usage.ot);
+    if(run.snapshot){run.snapshot.actualModel=run.actualModel;run.snapshot.pricing=modelPricing(v.provider,v.model);}
     if(testCase?.expectedContains){
       run.pass=run.out.toLowerCase().includes(testCase.expectedContains.toLowerCase());
     }
@@ -705,7 +874,7 @@ async function executeRun(v,{testCase=null,quiet=false}={}){
     const msg=e.message==='Failed to fetch'
       ? 'Failed to fetch. This provider may block direct browser calls; use OpenRouter for cross-provider testing or add a small backend proxy for production.'
       : e.message;
-    run.out=`Error: ${msg}`;run.streaming=false;run.error=true;run.ms=Date.now()-t0;
+    run.out=`Error: ${msg}`;run.streaming=false;run.error=true;run.ms=Date.now()-t0;run.errorMessage=msg;run.rawError=e.raw||null;
     saveS();renderRuns();
     throw new Error(msg);
   }
@@ -718,7 +887,7 @@ async function runPrompt(){
   document.getElementById('stxt').textContent=`Running ${v.name} on ${P[v.provider]?.name}…`;
   try{await executeRun(v);}
   catch(e){toast(e.message.slice(0,60),'err');}
-  finally{btn.disabled=false;suite.disabled=false;btn.textContent='▶ run';si.classList.remove('on');}
+  finally{btn.disabled=false;suite.disabled=false;btn.textContent='▶ Run prompt';si.classList.remove('on');}
 }
 
 async function runSuite(){
@@ -744,18 +913,23 @@ async function runSuite(){
 function renderRuns(){
   const el=document.getElementById('rlist');
   if(!S.runs.length){el.innerHTML='<div class="empty"><div class="big">◎</div><p>Run a prompt to see results.</p></div>';return;}
-  el.innerHTML=S.runs.slice(0,60).map(r=>{
+  el.innerHTML=S.runs.slice(0,60).map((r,i)=>{
     const p=P[r.provider]||P.anthropic;
+    const latest=i===0;
     const stars=[1,2,3,4,5].map(s=>`<span class="star${r.rating>=s?' on':''}" onclick="rateRun('${r.id}',${s})">★</span>`).join('');
-    return`<div class="rcard">
+    const compact=!latest&&!r.streaming;
+    const saved=isRunSaved(r.id);
+    const actions=r.error
+      ? `<span class="rlabel">failed run</span><div class="sp"></div><button class="btn btn-sm btn-g" onclick="openOutputModal('${r.id}')">view exact</button><button class="btn btn-sm btn-g" onclick="copyRunOutput('${r.id}')">copy</button><button class="btn btn-sm btn-g btn-d" onclick="delRun('${r.id}')">remove</button>`
+      : `<span class="rlabel">rate:</span>${stars}<div class="sp"></div><button class="btn btn-sm btn-g" onclick="saveAnswerPair('${r.id}')">${saved?'saved':'save pair'}</button><button class="btn btn-sm btn-g" onclick="openOutputModal('${r.id}')">view exact</button><button class="btn btn-sm btn-g" onclick="copyRunOutput('${r.id}')">copy</button><button class="btn btn-sm btn-g btn-d" onclick="delRun('${r.id}')">remove</button>`;
+    return`<div class="rcard${latest?' latest':''}${compact?' compact':''}">
       <div class="rchead">
         <div class="rcmeta">
           <span class="rcver">${esc(r.vname)}</span>
           <span class="rcprov" style="background:${p.color}20;color:${p.color};border:1px solid ${p.color}40">${p.name}</span>
-          <span class="tbadge">${esc(r.model||'model unknown')}</span>
           ${r.testCase?`<span class="chip">${esc(r.testCase.name||'test case')}</span>`:''}
           <span class="rctime">${ago(r.ts)}</span>
-          ${r.streaming?'<span class="chip" style="font-size:10px">streaming…</span>':''}
+          ${r.streaming?'<span class="chip" style="font-size:10px">streaming...</span>':''}
           ${r.error?'<span style="color:var(--danger);font-size:10px">error</span>':''}
           ${r.pass===true?'<span class="chip pass">pass</span>':''}
           ${r.pass===false?'<span class="chip fail">fail</span>':''}
@@ -765,13 +939,9 @@ function renderRuns(){
           ${r.ot?`<span class="tbadge">${r.ot}tok</span>`:''}
         </div>
       </div>
-      <div class="rcbody"><div class="rcout" id="ro_${r.id}">${esc(r.out)}</div></div>
-      ${r.snapshot?`<div class="snap">tested model: ${esc(r.snapshot.providerName||p.name)} / ${esc(r.snapshot.model||r.model)} · snapshot saved · ${esc(r.snapshot.resolvedUserMessage||'')}</div>`:''}
-      <div class="rcrating">
-        <span class="rlabel">rate:</span>${stars}
-        <div class="sp"></div>
-        <button class="btn btn-sm btn-g btn-d" onclick="delRun('${r.id}')">✕</button>
-      </div>
+      ${renderModelLine(r)}
+      ${renderRunOutput(r,latest)}
+      <div class="rcrating">${actions}</div>
     </div>`;
   }).join('');
 }
@@ -783,13 +953,178 @@ function rateRun(id,score){
 }
 function delRun(id){const r=S.runs.find(x=>x.id===id);S.runs=S.runs.filter(run=>run.id!==id);if(r)recomputeScore(r.vid);saveS();renderRuns();renderSidebar();}
 function clearRuns(){if(!confirm('Clear all runs?'))return;S.runs=[];S.versions.forEach(v=>v.avgScore=null);saveS();renderRuns();renderSidebar();}
+function clearErrors(){S.runs=S.runs.filter(r=>!r.error);saveS();renderRuns();renderSidebar();toast('Cleared failed runs','ok');}
+async function copyRunOutput(id){
+  const r=S.runs.find(x=>x.id===id);if(!r)return;
+  const txt=String(r.out||'').replace(/^Error:\s*/,'');
+  try{await navigator.clipboard.writeText(txt);toast('Copied exact output','ok');}
+  catch(e){toast('Copy failed','err');}
+}
 
-// ─── COMPARE ─────────────────────────────────────────────────────────────────
+function openOutputModal(id){
+  const r=S.runs.find(x=>x.id===id);if(!r)return;
+  const p=P[r.provider]||P.anthropic;
+  const clean=String(r.out||'').replace(/^Error:\s*/,'');
+  document.getElementById('focusMeta').textContent=`${r.vname} - ${p.name} - ${answeredModel(r)} - ${ago(r.ts)}`;
+  document.getElementById('focusBody').innerHTML=`
+    <div class="focus-output">${esc(clean||'No output was returned.')}</div>
+    <details class="focus-details"><summary>Prompt that produced this result</summary><div class="focus-pre">System:
+${esc(r.snapshot?.resolvedSystemPrompt||r.snapshot?.resolvedSystem||r.snapshot?.systemPrompt||r.snapshot?.system||'')}
+
+User:
+${esc(r.snapshot?.resolvedUserMessage||r.snapshot?.userMessage||'')}</div></details>
+    ${r.rawError?`<details class="focus-details"><summary>Exact provider error payload</summary><div class="focus-pre">${esc(JSON.stringify(r.rawError,null,2))}</div></details>`:''}
+  `;
+  document.getElementById('focusCopy').onclick=()=>copyRunOutput(id);
+  document.getElementById('outputModal').hidden=false;
+}
+function closeOutputModal(){document.getElementById('outputModal').hidden=true;}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeOutputModal();});
+
+function answeredModel(r){
+  const requested=r.model||r.snapshot?.model||'model unknown';
+  const actual=r.actualModel||r.snapshot?.actualModel||'';
+  if(actual&&actual!==requested)return actual;
+  if(r.provider==='openrouter'&&requested==='openrouter/free')return 'OpenRouter free router (actual model not returned)';
+  return requested;
+}
+function renderModelLine(r){
+  const requested=r.model||r.snapshot?.model||'model unknown';
+  const actual=answeredModel(r);
+  const differs=actual&&actual!==requested;
+  const warn=modelSuitabilityWarning(actual,requested);
+  return`<div class="model-line"><span>Answered by</span><strong>${esc(actual)}</strong>${differs?`<span class="model-chip">requested: ${esc(requested)}</span>`:''}</div>${warn?`<div class="model-warning">${esc(warn)}</div>`:''}`;
+}
+
+function renderRunOutput(r,latest){
+  const label=r.error?'Provider error':'Exact model response';
+  const quick=`<button class="btn btn-sm btn-g" onclick="openOutputModal('${r.id}')">focus</button>`;
+  const body=`<div class="rcbody"><div class="outlabel"><span>${label}</span>${quick}</div><div class="rcout${latest?' exact':''}" id="ro_${r.id}">${esc(r.out||'')}</div></div>`;
+  const details=`${renderErrorHelp(r)}${renderRunDetails(r)}`;
+  if(latest||r.streaming)return`${body}${details}`;
+  return`<details class="run-details">
+    <summary><span>${r.error?'Open provider error':'Open exact response'}</span><span class="preview">${esc(previewText(r.out))}</span></summary>
+    ${body}${details}
+  </details>`;
+}
+
+function renderRunDetails(r){
+  const p=P[r.provider]||P.anthropic;
+  return`<details class="run-details">
+    <summary><span>Run details</span><span class="preview">${esc(answeredModel(r))}</span></summary>
+    ${renderRunCost(r)}
+    ${r.snapshot?`<div class="snap">provider: ${esc(r.snapshot.providerName||p.name)} - requested: ${esc(r.snapshot.model||r.model)} - answered by: ${esc(answeredModel(r))} - snapshot saved - ${esc(r.snapshot.resolvedUserMessage||'')}</div>`:''}
+  </details>`;
+}
+
+// ??? ANSWER LIBRARY ???????????????????????????????????????????????????????????
+function pairTitle(text){return previewText(text).slice(0,72)||'Saved answer';}
+function isRunSaved(runId){return !!(S.savedPairs||[]).some(p=>p.runId===runId);}
+function pairFromRun(r){
+  const p=P[r.provider]||P.anthropic;
+  return normalizePair({
+    id:uid(),runId:r.id,vid:r.vid,vname:r.vname,provider:r.provider,providerName:p.name,
+    model:r.model,actualModel:answeredModel(r),systemPrompt:r.snapshot?.resolvedSystemPrompt||r.snapshot?.systemPrompt||'',
+    userMessage:r.snapshot?.resolvedUserMessage||r.snapshot?.userMessage||'',answer:String(r.out||'').replace(/^Error:\s*/,''),
+    rating:r.rating||0,it:r.it||0,ot:r.ot||0,cost:r.cost||null,tags:[],notes:'',createdAt:Date.now(),runAt:r.ts||Date.now()
+  });
+}
+function saveAnswerPair(runId){
+  const r=S.runs.find(x=>x.id===runId);if(!r)return;
+  if(r.error||!String(r.out||'').trim()){toast('Only successful answers can be saved','err');return;}
+  if(isRunSaved(runId)){toast('Already saved in Library','ok');switchTab('library');return;}
+  S.savedPairs=S.savedPairs||[];S.savedPairs.unshift(pairFromRun(r));saveS();renderRuns();refreshSimilarAnswers();renderLibrary();toast('Saved prompt + answer pair','ok');
+}
+function saveAllGoodRuns(){
+  S.savedPairs=S.savedPairs||[];
+  const before=S.savedPairs.length;
+  S.runs.filter(r=>!r.error&&!r.streaming&&String(r.out||'').trim()&&!isRunSaved(r.id)).forEach(r=>S.savedPairs.push(pairFromRun(r)));
+  const added=S.savedPairs.length-before;
+  saveS();renderRuns();refreshSimilarAnswers();renderLibrary();toast(added?`Saved ${added} prompt-answer pair(s)`:'No new successful runs to save',added?'ok':'');
+}
+function delPair(id){S.savedPairs=(S.savedPairs||[]).filter(p=>p.id!==id);saveS();renderLibrary();refreshSimilarAnswers();toast('Removed saved pair','ok');}
+async function copyPairAnswer(id){
+  const p=(S.savedPairs||[]).find(x=>x.id===id);if(!p)return;
+  try{await navigator.clipboard.writeText(p.answer||'');toast('Copied saved answer','ok');}catch(e){toast('Copy failed','err');}
+}
+async function copyPairPrompt(id){
+  const p=(S.savedPairs||[]).find(x=>x.id===id);if(!p)return;
+  try{await navigator.clipboard.writeText(`System:
+${p.systemPrompt||''}
+
+User:
+${p.userMessage||''}`);toast('Copied saved prompt','ok');}catch(e){toast('Copy failed','err');}
+}
+function loadPairPrompt(id){
+  const pair=(S.savedPairs||[]).find(x=>x.id===id),v=gv(S.active);if(!pair||!v)return;
+  v.systemPrompt=pair.systemPrompt||v.systemPrompt;v.userMessage=pair.userMessage||v.userMessage;saveS();renderEditor();switchTab('editor');toast('Loaded saved prompt into Build','ok');
+}
+function openPair(id){
+  const pair=(S.savedPairs||[]).find(x=>x.id===id);if(!pair)return;
+  document.getElementById('focusMeta').textContent=`saved pair - ${pair.providerName||pair.provider} - ${pair.actualModel||pair.model} - ${ago(pair.createdAt)}`;
+  document.getElementById('focusBody').innerHTML=`
+    <div class="focus-output">${esc(pair.answer||'No answer saved.')}</div>
+    <details class="focus-details" open><summary>Saved prompt</summary><div class="focus-pre">System:
+${esc(pair.systemPrompt||'')}
+
+User:
+${esc(pair.userMessage||'')}</div></details>
+    <details class="focus-details"><summary>Model + reuse metadata</summary><div class="focus-pre">Provider: ${esc(pair.providerName||pair.provider)}
+Requested model: ${esc(pair.model||'')}
+Answered by: ${esc(pair.actualModel||pair.model||'')}
+Original version: ${esc(pair.vname||'')}
+Saved: ${new Date(pair.createdAt).toLocaleString()}</div></details>
+  `;
+  document.getElementById('focusCopy').onclick=()=>copyPairAnswer(id);
+  document.getElementById('outputModal').hidden=false;
+}
+function renderPairCard(pair,{compact=false,score=null}={}){
+  const meta=[pair.providerName||pair.provider,pair.actualModel||pair.model,pair.vname,ago(pair.createdAt)].filter(Boolean).join(' - ');
+  return`<div class="pair-card">
+    <div class="pair-top"><div><div class="pair-title">${esc(pairTitle(pair.userMessage))}</div><div class="pair-meta">${esc(meta)}${score!=null?` - similarity ${Math.round(score*100)}%`:''}</div></div><button class="btn btn-sm btn-g" onclick="openPair('${pair.id}')">view</button></div>
+    ${compact?`<div class="pair-actions"><span class="rlabel">Reusable saved answer</span><div class="sp"></div><button class="btn btn-sm btn-g" onclick="copyPairAnswer('${pair.id}')">copy answer</button><button class="btn btn-sm btn-g" onclick="loadPairPrompt('${pair.id}')">load prompt</button></div>`:`<div class="pair-body"><div class="pair-box"><label>Prompt / question</label><div class="pair-text">${esc(pair.userMessage)}</div></div><div class="pair-box"><label>Saved answer</label><div class="pair-text">${esc(pair.answer)}</div></div></div><div class="pair-actions"><button class="btn btn-sm btn-g" onclick="copyPairAnswer('${pair.id}')">copy answer</button><button class="btn btn-sm btn-g" onclick="copyPairPrompt('${pair.id}')">copy prompt</button><button class="btn btn-sm btn-g" onclick="loadPairPrompt('${pair.id}')">load prompt</button><button class="btn btn-sm btn-g btn-d" onclick="delPair('${pair.id}')">delete</button></div>`}
+  </div>`;
+}
+function renderLibrary(query=null){
+  const el=document.getElementById('libraryTab');if(!el)return;
+  const q=query??document.getElementById('libSearch')?.value??'';
+  const pairs=S.savedPairs||[];
+  const filtered=q.trim()?rankPairs(q,pairs).filter(x=>x.score>0).map(x=>x.pair):pairs;
+  el.innerHTML=`
+    <div class="library-head"><h3>Answer Library</h3><p>Save useful model responses as prompt-answer pairs. Later you can search them, copy the answer into another product, or reuse the prompt without calling an LLM again.</p></div>
+    <div class="lib-tools"><input id="libSearch" type="text" placeholder="Search saved prompts and answers..." value="${esc(q)}" oninput="renderLibrary(this.value)"><span class="chip">${pairs.length} saved pair${pairs.length!==1?'s':''}</span></div>
+    <div class="pair-list">${filtered.length?filtered.map(p=>renderPairCard(p)).join(''):'<div class="empty"><div class="big">?</div><p>No saved answer pairs yet. Use ?save pair? on a successful result.</p></div>'}</div>
+  `;
+}
+function refreshSimilarAnswers(){const el=document.getElementById('similarAnswers');if(el&&S.active)el.innerHTML=renderSimilarAnswers(gv(S.active));}
+function renderSimilarAnswers(v){
+  const pairs=S.savedPairs||[];if(!v||!pairs.length)return'<p class="hint">No saved answer pairs yet. After a good run, click save pair so future similar questions can be reused.</p>';
+  const ranked=rankPairs(v.userMessage||'',pairs).filter(x=>x.score>=0.18).slice(0,3);
+  if(!ranked.length)return'<p class="hint">No close saved answer found for this user message yet.</p>';
+  return`<div class="memory-hits"><h4>Possible reusable answers found</h4>${ranked.map(x=>`<div class="memory-hit"><p>${esc(x.pair.answer)}</p><div style="display:flex;gap:6px;flex-shrink:0"><button class="btn btn-sm btn-g" onclick="openPair('${x.pair.id}')">view</button><button class="btn btn-sm btn-g" onclick="copyPairAnswer('${x.pair.id}')">copy</button></div></div>`).join('')}</div>`;
+}
+function rankPairs(query,pairs){
+  const qt=tokens(query);return pairs.map(pair=>{
+    const text=`${pair.userMessage||''} ${pair.answer||''}`;
+    const pt=tokens(text);const inter=[...qt].filter(t=>pt.has(t)).length;
+    const score=qt.size?inter/qt.size:0;
+    const phrase=query&&text.toLowerCase().includes(String(query).toLowerCase().trim())?0.5:0;
+    return{pair,score:Math.min(1,score+phrase)};
+  }).sort((a,b)=>b.score-a.score||b.pair.createdAt-a.pair.createdAt);
+}
+function tokens(text){
+  const stop=new Set(['the','a','an','and','or','to','of','in','is','it','for','with','on','this','that','how','what','why','can','i','you','me','my']);
+  return new Set(String(text||'').toLowerCase().match(/[a-z0-9]{3,}/g)?.filter(x=>!stop.has(x))||[]);
+}
+
+// ??? COMPARE ?????????????????????????????????????????????????????????????????
 function switchTab(t){
   document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.t===t));
   document.getElementById('editorTab').style.display=t==='editor'?'flex':'none';
   document.getElementById('compareTab').classList.toggle('on',t==='compare');
+  document.getElementById('libraryTab').classList.toggle('on',t==='library');
   if(t==='compare')fillCmpSelects();
+  if(t==='library')renderLibrary();
 }
 
 function fillCmpSelects(){
@@ -847,7 +1182,7 @@ const cosSim=(a,b)=>{const wA=new Set(a.toLowerCase().split(/\W+/).filter(Boolea
 
 // ─── IMPORT / EXPORT ─────────────────────────────────────────────────────────
 function doExport(){
-  const b=new Blob([JSON.stringify({versions:S.versions,runs:S.runs},null,2)],{type:'application/json'});
+  const b=new Blob([JSON.stringify({versions:S.versions,runs:S.runs,savedPairs:S.savedPairs||[]},null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download=`prompt-lab-${new Date().toISOString().slice(0,10)}.json`;a.click();
   toast('Exported!','ok');
 }
@@ -861,12 +1196,134 @@ function handleImport(e){
       const importedVersions=d.versions.map(normalizeVersion).map(v=>({...v,id:uid()}));
       const idMap=new Map(d.versions.map((v,i)=>[v.id,importedVersions[i].id]));
       const importedRuns=(d.runs||[]).map(normalizeRun).map(r=>({...r,id:uid(),vid:idMap.get(r.vid)||r.vid}));
+      const importedPairs=(d.savedPairs||[]).map(normalizePair).map(x=>({...x,id:uid(),runId:''}));
       S.versions=[...importedVersions,...S.versions];
       S.runs=[...importedRuns,...S.runs];
-      recomputeAllScores();saveS();renderSidebar();renderRuns();toast(`Imported ${importedVersions.length} version(s)`,'ok');
+      S.savedPairs=[...importedPairs,...(S.savedPairs||[])];
+      recomputeAllScores();saveS();renderSidebar();renderRuns();renderLibrary();toast(`Imported ${importedVersions.length} version(s) and ${importedPairs.length} saved pair(s)`,'ok');
     }
     catch{toast('Invalid file','err');}
   };r.readAsText(f);e.target.value='';
+}
+
+// ─── OPENROUTER MODELS + PRICING ─────────────────────────────────────────────
+function loadORCache(){
+  try{
+    const raw=localStorage.getItem('pl_or_models');if(!raw)return;
+    const d=JSON.parse(raw);
+    OR.models=Array.isArray(d.models)?d.models:[];
+    OR.loadedAt=d.loadedAt||0;
+  }catch(e){OR={models:[],loadedAt:0,error:''};}
+}
+function saveORCache(){localStorage.setItem('pl_or_models',JSON.stringify({models:OR.models,loadedAt:OR.loadedAt}));}
+async function loadOpenRouterModels(quiet=false){
+  OR.error='';
+  if(!quiet)toast('Loading OpenRouter models…','');
+  try{
+    const r=await fetch('https://openrouter.ai/api/v1/models');
+    if(!r.ok)throw await readErr(r);
+    const d=await r.json();
+    OR.models=(d.data||[]).map(m=>({
+      id:m.id,name:m.name||m.id,description:m.description||'',context_length:m.context_length||0,
+      pricing:{prompt:num(m.pricing?.prompt),completion:num(m.pricing?.completion)}
+    })).sort((a,b)=>Number(!isFreeModel(a))-Number(!isFreeModel(b)) || (a.name||a.id).localeCompare(b.name||b.id));
+    OR.loadedAt=Date.now();saveORCache();
+    if(S.active&&gv(S.active)?.provider==='openrouter')renderEditor();
+    if(!quiet)toast(`Loaded ${OR.models.length} OpenRouter models`,'ok');
+  }catch(e){
+    OR.error=`Could not load OpenRouter catalog: ${e.message}`;
+    if(S.active&&gv(S.active)?.provider==='openrouter')renderEditor();
+    if(!quiet)toast(OR.error.slice(0,80),'err');
+  }
+}
+function renderOpenRouterModelOptions(selected){
+  const fallback=P.openrouter.models.map(m=>({id:m.id,name:m.label,pricing:{prompt:null,completion:null}}));
+  const models=OR.models.length?OR.models:fallback;
+  const current=models.some(m=>m.id===selected)?'':`<option value="${esc(selected)}" selected>${esc(selected)} - current custom model</option>`;
+  const free=models.filter(isFreeModel);
+  const freeChat=free.filter(isGeneralChatModel);
+  const freeSpecial=free.filter(m=>!isGeneralChatModel(m));
+  const paid=models.filter(m=>!isFreeModel(m));
+  const opt=m=>`<option value="${esc(m.id)}"${m.id===selected?' selected':''}>${esc(m.name)} - FREE - ${esc(m.id)}</option>`;
+  return`${current}
+    ${freeChat.length?`<optgroup label="Recommended free chat models (${freeChat.length})">${freeChat.map(opt).join('')}</optgroup>`:''}
+    ${freeSpecial.length?`<optgroup label="Routers / specialty free models (${freeSpecial.length})">${freeSpecial.map(opt).join('')}</optgroup>`:''}
+    <optgroup label="Paid OpenRouter models (${paid.length})">${paid.map(m=>`<option value="${esc(m.id)}"${m.id===selected?' selected':''}>${esc(m.name)} - ${pricePerM(m.pricing.prompt)} in / ${pricePerM(m.pricing.completion)} out - ${esc(m.id)}</option>`).join('')}</optgroup>`;
+}
+
+function renderModelPriceHint(price){
+  if(!price)return'<p class="hint">Pricing unknown for this model until the OpenRouter catalog is loaded.</p>';
+  if(price.free)return'<p><span class="freebadge">FREE model</span></p>';
+  return`<div class="costbox">
+    <div class="costpill">Prompt/input price<strong>${pricePerM(price.prompt)} tokens</strong></div>
+    <div class="costpill">Answer/output price<strong>${pricePerM(price.completion)} tokens</strong></div>
+  </div>`;
+}
+function renderOpenRouterSelectionWarning(model){
+  if(model==='openrouter/free')return'<div class="warnbox"><strong>Free router selected.</strong> OpenRouter may choose any available free model, including safety/specialty models. Good for a quick trial; bad for clean comparisons.</div>';
+  const m=OR.models.find(x=>x.id===model);
+  if(m&&!isGeneralChatModel(m))return`<div class="warnbox"><strong>Specialty model selected.</strong> ${esc(m.name||m.id)} may not behave like a general chat model. Pick from Recommended free chat models for prompt testing.</div>`;
+  return'';
+}
+function renderRunCost(r){
+  const cost=r.cost||estimateCost(r.provider,r.model,r.it,r.ot);
+  if(!cost)return'';
+  if(cost.free)return'<div class="costbox" style="padding:0 11px 9px"><div class="costpill"><span class="freebadge">Free model</span><strong>$0.00</strong></div><div class="costpill">Prompt + answer<strong>$0.00</strong></div></div>';
+  return`<div class="costbox" style="padding:0 11px 9px">
+    <div class="costpill">Prompt cost (${r.it||0} tokens)<strong>${money(cost.promptCost)}</strong></div>
+    <div class="costpill">Answer cost (${r.ot||0} tokens)<strong>${money(cost.answerCost)}</strong></div>
+  </div>`;
+}
+function renderErrorHelp(r){
+  if(!r.error)return'';
+  const msg=r.errorMessage||String(r.out||'').replace(/^Error:\s*/,'');
+  const raw=renderRawError(r.rawError);
+  if(r.provider==='openrouter'&&isFreeModelId(r.model)){
+    return`<div class="snap" style="color:var(--a3)">This free OpenRouter model failed upstream. Free models can be capacity-limited or temporarily unavailable. Try another free model, or use OpenRouter's free router.<br><button class="btn btn-sm btn-g" onclick="useOpenRouterFreeRouter('${r.vid}')">use openrouter/free</button>${raw}</div>`;
+  }
+  return`<div class="snap" style="color:var(--a3)">Provider error detail: ${esc(msg||'No additional detail returned.')}${raw}</div>`;
+}
+function renderRawError(raw){
+  if(!raw)return'';
+  const txt=typeof raw==='string'?raw:JSON.stringify(raw,null,2);
+  return`<details style="margin-top:8px;color:var(--muted)"><summary style="cursor:pointer;color:var(--text)">show exact provider response</summary><pre style="white-space:pre-wrap;word-break:break-word;margin-top:6px;max-height:220px;overflow:auto">${esc(txt)}</pre></details>`;
+}
+function useOpenRouterFreeRouter(vid){
+  const v=gv(vid);if(!v)return;
+  v.provider='openrouter';v.model='openrouter/free';saveS();selVer(v.id);toast('Switched to OpenRouter free router','ok');
+}
+function modelPricing(provider,model){
+  if(provider!=='openrouter')return null;
+  const m=OR.models.find(x=>x.id===model);
+  if(!m)return null;
+  return{prompt:m.pricing.prompt,completion:m.pricing.completion,free:isFreeModel(m)};
+}
+function estimateCost(provider,model,it=0,ot=0){
+  const p=modelPricing(provider,model);
+  if(!p)return null;
+  if(p.free)return{free:true,promptCost:0,answerCost:0,total:0,prompt:p.prompt,completion:p.completion};
+  if(!Number.isFinite(p.prompt)||!Number.isFinite(p.completion))return null;
+  const promptCost=(it||0)*(p.prompt||0),answerCost=(ot||0)*(p.completion||0);
+  return{free:false,promptCost,answerCost,total:promptCost+answerCost,prompt:p.prompt,completion:p.completion};
+}
+function isFreeModel(m){return (m.pricing?.prompt===0&&m.pricing?.completion===0)||isFreeModelId(m.id)||/\bfree\b/i.test(m.name||'');}
+function isFreeModelId(id){return String(id||'').endsWith(':free')||String(id||'')==='openrouter/free';}
+function isSpecialtyModelId(id){return /(?:safety|guard|moderation|moderator|policy|classif|embed|embedding|rerank|ranker|reward|ocr|vision|image|audio|whisper|tts|transcrib|router|free$)/i.test(String(id||''));}
+function isGeneralChatModel(m){const id=String(m?.id||''),name=String(m?.name||'');return id!=='openrouter/free'&&!isSpecialtyModelId(id)&&!/safety|guard|moderation|embedding|rerank|reward|router/i.test(name);}
+function modelSuitabilityWarning(actual,requested){
+  if(String(requested||'')==='openrouter/free'&&String(actual||'')==='OpenRouter free router (actual model not returned)')return'Free router did not reveal the actual model. Do not use this run for strict model comparisons.';
+  if(isSpecialtyModelId(actual))return'This looks like a safety/specialty model, not a general chat model. The answer may not be representative for prompt testing.';
+  if(String(requested||'')==='openrouter/free')return'This came through the free router, so future runs may use a different model. Choose a specific model for repeatable evals.';
+  return'';
+}
+function orCounts(){const free=OR.models.filter(isFreeModel);return{free:free.length,freeChat:free.filter(isGeneralChatModel).length,paid:OR.models.filter(m=>!isFreeModel(m)).length};}
+function num(v){const n=Number(v);return Number.isFinite(n)&&n>=0?n:null;}
+function pricePerM(v){return v===0?'free':Number.isFinite(v)&&v>=0?`$${(v*1000000).toFixed(v*1000000<0.01?4:2)}/M`:'price unknown';}
+function money(v){return v===0?'$0.00':v<0.000001?'<$0.000001':`$${v.toFixed(6)}`;}
+function formatProviderError(e){
+  if(typeof e==='string')return e;
+  const parts=[e.message,e.code?`code: ${e.code}`:'',e.metadata?.raw?`raw: ${e.metadata.raw}`:'',e.metadata?.provider_name?`provider: ${e.metadata.provider_name}`:''].filter(Boolean);
+  return parts.join(' · ')||'Provider returned an error';
 }
 
 // ─── UTILS ───────────────────────────────────────────────────────────────────
@@ -874,6 +1331,7 @@ const esc=s=>String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>
 const escRe=s=>String(s||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
 const clone=x=>JSON.parse(JSON.stringify(x));
 const ago=ts=>{const s=Math.floor((Date.now()-ts)/1000);if(s<60)return'just now';if(s<3600)return`${Math.floor(s/60)}m ago`;if(s<86400)return`${Math.floor(s/3600)}h ago`;return`${Math.floor(s/86400)}d ago`;};
+const previewText=s=>String(s||'').replace(/^Error:\s*/,'').replace(/\s+/g,' ').trim().slice(0,120)||'No output yet';
 function toast(msg,type=''){const t=document.getElementById('toast');t.textContent=msg;t.className=`toast ${type} show`;setTimeout(()=>t.className='toast',2800);}
 function defaultTest(name='smoke test'){return{id:uid(),name,userMessage:'Tell me something interesting.',expectedContains:''};}
 function normalizeVersion(v={}){
@@ -887,10 +1345,17 @@ function normalizeVersion(v={}){
     createdAt:v.createdAt||Date.now(),avgScore:v.avgScore??null,notes:v.notes||''
   };
 }
+function normalizePair(p={}){
+  return{
+    id:p.id||uid(),runId:p.runId||'',vid:p.vid||'',vname:p.vname||'',provider:P[p.provider]?p.provider:'openrouter',providerName:p.providerName||P[p.provider]?.name||p.provider||'',
+    model:p.model||'',actualModel:p.actualModel||p.model||'',systemPrompt:p.systemPrompt||'',userMessage:p.userMessage||'',answer:p.answer||'',
+    rating:p.rating||0,it:p.it||0,ot:p.ot||0,cost:p.cost||null,tags:Array.isArray(p.tags)?p.tags:[],notes:p.notes||'',createdAt:p.createdAt||Date.now(),runAt:p.runAt||p.createdAt||Date.now()
+  };
+}
 function normalizeRun(r={}){
   return{
-    id:r.id||uid(),vid:r.vid||'',vname:r.vname||'unknown',provider:P[r.provider]?r.provider:'anthropic',model:r.model||'',
-    out:r.out||'',streaming:false,ts:r.ts||Date.now(),ms:r.ms||0,it:r.it||0,ot:r.ot||0,rating:r.rating||0,error:!!r.error,
+    id:r.id||uid(),vid:r.vid||'',vname:r.vname||'unknown',provider:P[r.provider]?r.provider:'anthropic',model:r.model||'',actualModel:r.actualModel||r.snapshot?.actualModel||'',
+    out:r.out||'',streaming:false,ts:r.ts||Date.now(),ms:r.ms||0,it:r.it||0,ot:r.ot||0,rating:r.rating||0,error:!!r.error,errorMessage:r.errorMessage||'',rawError:r.rawError||null,cost:r.cost||null,
     testCase:r.testCase||null,pass:r.pass??null,snapshot:r.snapshot||null
   };
 }
